@@ -71,7 +71,7 @@ export async function login(data: LoginInput): Promise<string> {
     sendToEmail = process.env.ADMIN_EMAIL as string;
   } else if (user.role_id === 3) {
     // Staff → send to staff email from .env
-    sendToEmail = process.env.STAFF_EMAIL as string;
+    sendToEmail = process.env.STAFF_EMAIL as string; 
   }
 
   await sendOtpEmail(sendToEmail, otpCode);

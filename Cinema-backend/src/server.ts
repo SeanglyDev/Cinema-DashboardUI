@@ -11,6 +11,12 @@ app.use(express.json());
 import authRouter from './routes/auth.route';
 app.use('/api/auth', authRouter);
 
+import movieRoutes from './routes/movie.route';
+app.use('/api/movies', movieRoutes);
+
+import userRoutes from './routes/user.route';
+app.use('/api/users', userRoutes);
+
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from Express + TypeScript!');
 });

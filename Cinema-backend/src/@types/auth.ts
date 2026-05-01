@@ -24,3 +24,8 @@ export interface UserFromDB {
   password_hash: string;
   is_active: boolean;
 }
+
+export interface AuthenticatedUser {
+  user_id: number;
+  role_id: number;
+}
