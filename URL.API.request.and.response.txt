@@ -1,0 +1,381 @@
+BASE URL
+http://localhost:3000
+
+For admin routes, add this header:
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+==================================================
+AUTH
+==================================================
+
+1. Register
+POST http://localhost:3000/api/auth/register
+
+Request:
+{
+  "name": "User Name",
+  "email": "user@example.com",
+  "password": "password123",
+  "profile_user": "https://example.com/profile.jpg"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Register successful! Please login."
+}
+
+2. Login
+POST http://localhost:3000/api/auth/login
+
+Request:
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
+Response:
+{
+  "success": true,
+  "message": "OTP sent to your email"
+}
+
+3. Verify OTP
+POST http://localhost:3000/api/auth/verify-otp
+
+Request:
+{
+  "email": "user@example.com",
+  "otp_code": "123456"
+}
+
+Response:
+{
+  "success": true,
+  "token": "JWT_TOKEN_HERE"
+}
+
+4. Forgot Password
+POST http://localhost:3000/api/auth/forgot-password
+
+Request:
+{
+  "email": "user@example.com"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Password reset OTP sent to your email"
+}
+
+5. Reset Password
+POST http://localhost:3000/api/auth/reset-password
+
+Request:
+{
+  "email": "user@example.com",
+  "otp_code": "123456",
+  "new_password": "newpassword123"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Password reset successful. Please login with your new password."
+}
+
+==================================================
+MOVIES
+==================================================
+
+1. Get All Movies
+GET http://localhost:3000/api/movies
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Movie By ID
+GET http://localhost:3000/api/movies/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "movie_id": 1,
+    "poster_url": "https://example.com/poster.jpg",
+    "title": "Movie Title",
+    "genre": "Action",
+    "duration_min": 120,
+    "status": "active",
+    "description": "Movie description",
+    "created_at": "2026-05-23T00:00:00.000Z"
+  }
+}
+
+3. Add Movie - Admin Token Required
+POST http://localhost:3000/api/movies
+
+Request:
+{
+  "poster_url": "https://example.com/poster.jpg",
+  "title": "Movie Title",
+  "genre": "Action",
+  "duration_min": 120,
+  "status": "active",
+  "description": "Movie description"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "movie_id": 1,
+    "title": "Movie Title"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Movie already exists"
+}
+
+4. Update Movie - Admin Token Required
+PUT http://localhost:3000/api/movies/1
+
+Request:
+{
+  "title": "Updated Movie Title",
+  "genre": "Drama",
+  "duration_min": 130,
+  "status": "active",
+  "description": "Updated description",
+  "poster_url": "https://example.com/new-poster.jpg"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "movie_id": 1,
+    "title": "Updated Movie Title"
+  }
+}
+
+5. Delete Movie - Admin Token Required
+DELETE http://localhost:3000/api/movies/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Movie deleted"
+}
+
+==================================================
+CINEMAS
+==================================================
+
+1. Get All Cinemas
+GET http://localhost:3000/api/cinemas
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Cinema By ID
+GET http://localhost:3000/api/cinemas/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "cinema_id": 1,
+    "name": "Cinema Name",
+    "location": "Phnom Penh",
+    "contact": "012345678",
+    "created_at": "2026-05-23T00:00:00.000Z"
+  }
+}
+
+3. Add Cinema - Admin Token Required
+POST http://localhost:3000/api/cinemas
+
+Request:
+{
+  "name": "Cinema Name",
+  "location": "Phnom Penh",
+  "contact": "012345678"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "cinema_id": 1,
+    "name": "Cinema Name"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Cinema already exists"
+}
+
+4. Update Cinema - Admin Token Required
+PUT http://localhost:3000/api/cinemas/1
+
+Request:
+{
+  "name": "Updated Cinema Name",
+  "location": "Siem Reap",
+  "contact": "098765432"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "cinema_id": 1,
+    "name": "Updated Cinema Name"
+  }
+}
+
+5. Delete Cinema - Admin Token Required
+DELETE http://localhost:3000/api/cinemas/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Cinema deleted"
+}
+
+==================================================
+HALLS
+==================================================
+
+1. Get All Halls
+GET http://localhost:3000/api/halls
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Hall By ID
+GET http://localhost:3000/api/halls/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "hall_id": 1,
+    "cinema_id": 1,
+    "name": "Hall A",
+    "capacity": 100,
+    "created_at": "2026-05-23T00:00:00.000Z"
+  }
+}
+
+3. Get Halls By Cinema ID
+GET http://localhost:3000/api/halls/cinema/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+4. Add Hall - Admin Token Required
+POST http://localhost:3000/api/halls
+
+Request:
+{
+  "cinema_id": 1,
+  "name": "Hall A",
+  "capacity": 100
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "hall_id": 1,
+    "cinema_id": 1,
+    "name": "Hall A",
+    "capacity": 100
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Hall already exists in this cinema"
+}
+
+5. Update Hall - Admin Token Required
+PUT http://localhost:3000/api/halls/1
+
+Request:
+{
+  "name": "Hall B",
+  "capacity": 150
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "hall_id": 1,
+    "name": "Hall B",
+    "capacity": 150
+  }
+}
+
+6. Delete Hall - Admin Token Required
+DELETE http://localhost:3000/api/halls/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Hall deleted"
+}
+

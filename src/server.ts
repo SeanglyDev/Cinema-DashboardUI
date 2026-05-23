@@ -24,6 +24,8 @@ app.use('/api/cinemas', cinemaRoutes);
 import hallRoutes from './routes/hall.Routes';
 app.use('/api/halls', hallRoutes);
 
+import seatRoutes from './routes/seat.Routes';
+app.use('/api/seats', seatRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from Express + TypeScript!');

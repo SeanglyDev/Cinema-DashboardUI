@@ -9,6 +9,9 @@ export const PERMISSIONS = {
   HALL_CREATE: 'hall:create',
   HALL_UPDATE: 'hall:update',
   HALL_DELETE: 'hall:delete',
+  SEAT_CREATE: 'seat:create',
+  SEAT_UPDATE: 'seat:update',
+  SEAT_DELETE: 'seat:delete',
   USER_READ: 'user:read',
 } as const;
 

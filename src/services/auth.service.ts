@@ -11,19 +11,60 @@ import type {
   UserFromDB,
 } from '../@types/auth';
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const otpRegex = /^\d{6}$/;
+const minPasswordLength = 6;
+
+function normalizeEmail(email: string | undefined): string {
+  if (!email) throw new Error('Email is required');
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) throw new Error('Email is required');
+  if (!emailRegex.test(normalizedEmail)) throw new Error('Email is invalid');
+
+  return normalizedEmail;
+}
+
+function validatePassword(password: string | undefined, fieldName = 'Password'): string {
+  if (!password) throw new Error(`${fieldName} is required`);
+  if (password.length < minPasswordLength) {
+    throw new Error(`${fieldName} must be at least ${minPasswordLength} characters`);
+  }
+
+  return password;
+}
+
+function validateOtp(otpCode: string | undefined): string {
+  if (!otpCode) throw new Error('OTP code is required');
+
+  const normalizedOtp = otpCode.trim();
+  if (!otpRegex.test(normalizedOtp)) throw new Error('OTP code must be 6 digits');
+
+  return normalizedOtp;
+}
+
 // =====================
 // REGISTER
 // =====================
 export async function register(data: RegisterInput): Promise<string> {
+  if (!data.name) throw new Error('Name is required');
+
+  const name = data.name.trim();
+  if (!name) throw new Error('Name is required');
+
+  const email = normalizeEmail(data.email);
+  const password = validatePassword(data.password);
+  const profileUser = data.profile_user?.trim() || null;
+
   // 1. Check email already exists
   const existing = await pool.query(
-    'SELECT * FROM users WHERE email = $1',
-    [data.email]
+    'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+    [email]
   );
   if (existing.rows[0]) throw new Error('Email already exists');
 
   // 2. Hash password
-  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // 3. Default role = customer (role_id = 2)
   const defaultRoleId = 2;
@@ -32,7 +73,7 @@ export async function register(data: RegisterInput): Promise<string> {
   await pool.query(
     `INSERT INTO users (role_id, name, email, password_hash, profile_user, is_active)
      VALUES ($1, $2, $3, $4, $5, true)`,
-    [defaultRoleId, data.name, data.email, hashedPassword, data.profile_user || null]
+    [defaultRoleId, name, email, hashedPassword, profileUser]
   );
 
   return 'Register successful! Please login.';
@@ -42,10 +83,13 @@ export async function register(data: RegisterInput): Promise<string> {
 // LOGIN - Step 1
 // =====================
 export async function login(data: LoginInput): Promise<string> {
+  const email = normalizeEmail(data.email);
+  if (!data.password) throw new Error('Password is required');
+
   // 1. Check user exists
   const result = await pool.query(
-    'SELECT * FROM users WHERE email = $1',
-    [data.email]
+    'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+    [email]
   );
   const user: UserFromDB = result.rows[0];
   if (!user) throw new Error('Email not found');
@@ -90,10 +134,13 @@ export async function login(data: LoginInput): Promise<string> {
 // VERIFY OTP - Step 2
 // =====================
 export async function verifyOtp(data: VerifyOtpInput): Promise<string> {
+  const email = normalizeEmail(data.email);
+  const otpCode = validateOtp(data.otp_code);
+
   // 1. Get user
   const userResult = await pool.query(
-    'SELECT * FROM users WHERE email = $1',
-    [data.email]
+    'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+    [email]
   );
   const user: UserFromDB = userResult.rows[0];
   if (!user) throw new Error('User not found');
@@ -103,7 +150,7 @@ export async function verifyOtp(data: VerifyOtpInput): Promise<string> {
     `SELECT * FROM otp_token
      WHERE user_id = $1 AND otp_code = $2 AND is_used = false
      ORDER BY created_at DESC LIMIT 1`,
-    [user.user_id, data.otp_code]
+    [user.user_id, otpCode]
   );
   const otp = otpResult.rows[0];
   if (!otp) throw new Error('Invalid OTP code');
@@ -131,11 +178,11 @@ export async function verifyOtp(data: VerifyOtpInput): Promise<string> {
 // FORGOT PASSWORD - Step 1
 // =====================
 export async function forgotPassword(data: ForgotPasswordInput): Promise<string> {
-  if (!data.email) throw new Error('Email is required');
+  const email = normalizeEmail(data.email);
 
   const result = await pool.query(
-    'SELECT * FROM users WHERE email = $1',
-    [data.email]
+    'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+    [email]
   );
   const user: UserFromDB = result.rows[0];
   if (!user) throw new Error('Email not found');
@@ -159,14 +206,13 @@ export async function forgotPassword(data: ForgotPasswordInput): Promise<string>
 // RESET PASSWORD - Step 2
 // =====================
 export async function resetPassword(data: ResetPasswordInput): Promise<string> {
-  if (!data.email) throw new Error('Email is required');
-  if (!data.otp_code) throw new Error('OTP code is required');
-  if (!data.new_password) throw new Error('New password is required');
-  if (data.new_password.length < 6) throw new Error('New password must be at least 6 characters');
+  const email = normalizeEmail(data.email);
+  const otpCode = validateOtp(data.otp_code);
+  const newPassword = validatePassword(data.new_password, 'New password');
 
   const userResult = await pool.query(
-    'SELECT * FROM users WHERE email = $1',
-    [data.email]
+    'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+    [email]
   );
   const user: UserFromDB = userResult.rows[0];
   if (!user) throw new Error('User not found');
@@ -176,13 +222,13 @@ export async function resetPassword(data: ResetPasswordInput): Promise<string> {
     `SELECT * FROM otp_token
      WHERE user_id = $1 AND otp_code = $2 AND is_used = false
      ORDER BY created_at DESC LIMIT 1`,
-    [user.user_id, data.otp_code]
+    [user.user_id, otpCode]
   );
   const otp = otpResult.rows[0];
   if (!otp) throw new Error('Invalid OTP code');
   if (new Date() > otp.expires_at) throw new Error('OTP code has expired');
 
-  const hashedPassword = await bcrypt.hash(data.new_password, 10);
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   await pool.query(
     'UPDATE users SET password_hash = $1 WHERE user_id = $2',
