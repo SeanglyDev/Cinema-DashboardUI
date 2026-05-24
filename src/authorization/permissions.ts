@@ -12,6 +12,9 @@ export const PERMISSIONS = {
   SEAT_CREATE: 'seat:create',
   SEAT_UPDATE: 'seat:update',
   SEAT_DELETE: 'seat:delete',
+  SHOWTIME_CREATE: 'showtime:create',
+  SHOWTIME_UPDATE: 'showtime:update',
+  SHOWTIME_DELETE: 'showtime:delete',
   USER_READ: 'user:read',
 } as const;
 

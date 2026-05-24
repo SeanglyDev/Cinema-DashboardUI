@@ -380,6 +380,158 @@ Response:
 }
 
 ==================================================
+SHOWTIMES
+==================================================
+
+1. Get All ShowTimes
+GET http://localhost:3000/api/showtimes
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "show_time_id": 1,
+      "show_date": "2026-05-23",
+      "show_time": "14:00",
+      "status": "active",
+      "movie_title": "Avengers",
+      "movie_genre": "Action",
+      "movie_duration": 120,
+      "hall_name": "Hall A",
+      "cinema_name": "Legend Cineplex"
+    }
+  ]
+}
+
+2. Get ShowTimes By Movie ID
+GET http://localhost:3000/api/showtimes/movie/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "show_time_id": 1,
+      "show_date": "2026-05-23",
+      "show_time": "14:00",
+      "status": "active",
+      "movie_title": "Avengers",
+      "movie_genre": "Action",
+      "movie_duration": 120,
+      "hall_name": "Hall A",
+      "cinema_name": "Legend Cineplex"
+    }
+  ]
+}
+
+3. Get ShowTime By ID
+GET http://localhost:3000/api/showtimes/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "show_time_id": 1,
+    "movie_id": 1,
+    "hall_id": 1,
+    "show_date": "2026-05-23T00:00:00.000Z",
+    "show_time": "14:00:00",
+    "status": "active",
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+4. Add ShowTime - Admin Token Required
+POST http://localhost:3000/api/showtimes
+
+Request:
+{
+  "movie_id": 1,
+  "hall_id": 1,
+  "show_date": "2026-05-23",
+  "show_time": "14:00",
+  "status": "active"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "show_time_id": 1,
+    "show_date": "2026-05-23",
+    "show_time": "14:00:00",
+    "status": "active",
+    "movie_title": "Avengers",
+    "movie_genre": "Action",
+    "movie_duration": 120,
+    "hall_name": "Hall A",
+    "cinema_name": "Legend Cineplex"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Show time already exists for this hall, date, and time"
+}
+
+Customer or no token response:
+{
+  "success": false,
+  "message": "You do not have permission"
+}
+
+5. Update ShowTime - Admin Token Required
+PUT http://localhost:3000/api/showtimes/1
+
+Request:
+{
+  "movie_id": 1,
+  "hall_id": 1,
+  "show_date": "2026-05-23",
+  "show_time": "15:15",
+  "status": "active"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "show_time_id": 1,
+    "show_date": "2026-05-23",
+    "show_time": "15:15:00",
+    "status": "active",
+    "movie_title": "Avengers",
+    "movie_genre": "Action",
+    "movie_duration": 120,
+    "hall_name": "Hall A",
+    "cinema_name": "Legend Cineplex"
+  }
+}
+
+6. Delete ShowTime - Admin Token Required
+DELETE http://localhost:3000/api/showtimes/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Show time deleted"
+}
+
+==================================================
 SEATS
 ==================================================
 
