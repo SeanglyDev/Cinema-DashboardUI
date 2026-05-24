@@ -1,17 +1,20 @@
-import type { ReactElement } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
 import './Dashboard.css'
+import Navbar from './Navbar'
 
 type NavItem = {
   label: string
   icon: string
   active?: boolean
+  badge?: string
 }
 
 type StatTone = 'gold' | 'teal' | 'blue' | 'pink'
 
 type StatCard = {
   title: string
-  value: string
+  value: number
+  prefix?: string
   tone: StatTone
   icon: string
 }
@@ -20,7 +23,7 @@ type MovieTone = 'gold' | 'amber' | 'teal' | 'sky'
 
 type MovieItem = {
   title: string
-  tickets: string
+  tickets: number
   progress: number
   tone: MovieTone
 }
@@ -29,16 +32,16 @@ type BookingItem = {
   id: string
   customer: string
   movie: string
-  amount: string
+  amount: number
   status: 'Paid' | 'Pending' | 'Cancelled'
 }
 
 type PageName = 'dashboard' | 'reports'
 
-const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge', active: true }]
+const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
 const contentItems: NavItem[] = [
-  { label: 'Movies', icon: 'film' },
+  { label: 'Movies', icon: 'film', badge: '12' },
   { label: 'Showtimes', icon: 'calendar' },
 ]
 
@@ -48,37 +51,37 @@ const venueItems: NavItem[] = [
 ]
 
 const transactionItems: NavItem[] = [
-  { label: 'Bookings', icon: 'ticket' },
+  { label: 'Bookings', icon: 'ticket', badge: '5' },
   { label: 'Payments', icon: 'wallet' },
 ]
 
 const systemItems: NavItem[] = [
   { label: 'Users', icon: 'user' },
-  { label: 'Role & Permissions', icon: 'shield' },
-  { label: 'Notifications', icon: 'bell' },
+  { label: 'Roles & Perms', icon: 'shield' },
+  { label: 'Settings', icon: 'settings' },
 ]
 
 const statCards: StatCard[] = [
-  { title: 'Total Collected', value: '$48,290', tone: 'gold', icon: 'dollar' },
-  { title: 'Tickets Sold', value: '$48,290', tone: 'teal', icon: 'ticket' },
-  { title: 'Total Bookings', value: '$48,290', tone: 'blue', icon: 'receipt' },
-  { title: 'Active Customers', value: '$48,290', tone: 'pink', icon: 'group' },
+  { title: 'Total Collected', value: 48290, prefix: '$', tone: 'gold', icon: 'dollar' },
+  { title: 'Tickets Sold', value: 48290, prefix: '$', tone: 'teal', icon: 'ticket' },
+  { title: 'Total Bookings', value: 48290, prefix: '$', tone: 'blue', icon: 'receipt' },
+  { title: 'Active Customers', value: 48290, prefix: '$', tone: 'pink', icon: 'group' },
 ]
 
 const monthlyRevenue = [44, 34, 52, 38, 58, 49, 61, 46, 55, 63, 50, 67]
 
 const topMovies: MovieItem[] = [
-  { title: "The Lion's Kingdom", tickets: '520 tkts', progress: 100, tone: 'gold' },
-  { title: "The Lion's Kingdom", tickets: '340 tkts', progress: 70, tone: 'amber' },
-  { title: "The Lion's Kingdom", tickets: '244 tkts', progress: 29, tone: 'teal' },
-  { title: "The Lion's Kingdom", tickets: '270 tkts', progress: 45, tone: 'sky' },
+  { title: "The Lion's Kingdom", tickets: 520, progress: 100, tone: 'gold' },
+  { title: "The Lion's Kingdom", tickets: 340, progress: 70, tone: 'amber' },
+  { title: "The Lion's Kingdom", tickets: 244, progress: 29, tone: 'teal' },
+  { title: "The Lion's Kingdom", tickets: 270, progress: 45, tone: 'sky' },
 ]
 
 const bookings: BookingItem[] = [
-  { id: '#BK001', customer: 'Sophea Kim', movie: "Lion's Kingdom", amount: '$24.00', status: 'Paid' },
-  { id: '#BK003', customer: 'Dara Vann', movie: 'Galaxy Rush 3', amount: '$24.00', status: 'Paid' },
-  { id: '#BK004', customer: 'Mony Lim', movie: 'Shadow Detective', amount: '$18.00', status: 'Pending' },
-  { id: '#BK005', customer: 'Bopha Seng', movie: 'Forever & Always', amount: '$48.00', status: 'Cancelled' },
+  { id: '#BK001', customer: 'Sophea Kim', movie: "Lion's Kingdom", amount: 24, status: 'Paid' },
+  { id: '#BK003', customer: 'Dara Vann', movie: 'Galaxy Rush 3', amount: 24, status: 'Paid' },
+  { id: '#BK004', customer: 'Mony Lim', movie: 'Shadow Detective', amount: 18, status: 'Pending' },
+  { id: '#BK005', customer: 'Bopha Seng', movie: 'Forever & Always', amount: 48, status: 'Cancelled' },
 ]
 
 const months = ['Jan', 'Fb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -104,14 +107,16 @@ const statusClasses: Record<BookingItem['status'], string> = {
 }
 
 const panelClasses =
-  'rounded-[18px] border border-white/6 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]'
+  'rounded-[14px] border border-white/6 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]'
 
 function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
+  const [activeNav, setActiveNav] = useState('Dashboard')
+
   return (
-    <div className="min-h-screen bg-[#05070f] text-[#f4f0e6]">
-      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:grid-cols-[274px_minmax(0,1fr)]">
-        <aside className="flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18]/90 px-3.5 py-6 lg:border-r lg:border-b-0">
-          <div className="flex items-center gap-3.5 border-b border-white/8 px-3 py-2 pb-6">
+    <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden ">
+      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0 lg:grid-cols-[274px_minmax(0,1fr)]">
+        <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
+          <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
               <span className="text-lg">🎬</span>
             </div>
@@ -121,21 +126,23 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
             </div>
           </div>
 
-          <nav className="flex-1 pt-6">
-            <NavSection title="OVERVIEW" items={overviewItems} onNavigate={onNavigate} />
-            <NavSection title="CONTENT" items={contentItems} />
-            <NavSection title="VENUE" items={venueItems} />
-            <NavSection title="TRANSATIONS" items={transactionItems} />
+          <nav className="dashboard-scrollbar relative z-0 min-h-0 flex-1 overflow-y-auto pt-6">
+            <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
+            <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} setActiveNav={setActiveNav} />
+            <NavSection title="VENUE" items={venueItems} activeNav={activeNav} setActiveNav={setActiveNav} />
+            <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} setActiveNav={setActiveNav} />
             <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
             <NavSection
               title=""
               items={[{ label: 'Reports', icon: 'chart' }]}
+              activeNav={activeNav}
+              setActiveNav={setActiveNav}
               onNavigate={onNavigate}
             />
-            <NavSection title="SYSTEM" items={systemItems} />
+            <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} setActiveNav={setActiveNav} />
           </nav>
 
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-white/4 px-3.5 py-2.5">
+          <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]">
               SA
             </div>
@@ -149,49 +156,20 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
           </div>
         </aside>
 
-        <main className="p-3.5 sm:p-5">
-          <header className="flex flex-col items-stretch justify-between gap-5 border-b border-white/8 px-1.5 pb-5 md:flex-row md:items-center">
-            <div>
-              <h2 className="m-0 font-serif text-4xl font-medium text-[#faf7ee]">Dashboard</h2>
-              <p className="mt-1.5 text-sm text-[#707997]">Welcome back, Supper Admin</p>
-            </div>
+        <main className="content-transition dashboard-scrollbar min-h-0 mt-0 px-3 pb-3 sm:px-4 sm:pb-4 lg:h-screen lg:overflow-y-auto lg:px-5 lg:pb-5">
+          <Navbar title="Dashboard" subtitle="Welcome back, Super Admin" />
 
-            <div className="flex flex-wrap items-center gap-3">
-              <label
-                className="flex h-11 w-full items-center gap-2.5 rounded-xl border border-white/8 bg-[#121624]/88 px-3.5 md:w-[248px]"
-                aria-label="Search"
-              >
-                <span className="text-[#7f87a6]">
-                  <DashboardIcon name="search" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search...."
-                  className="h-full w-full border-0 bg-transparent text-[#eef1f8] outline-none placeholder:text-[#69728e]"
-                />
-              </label>
-              <IconButton label="Notifications" icon="bell" />
-              <IconButton label="Settings" icon="settings" />
-              <button
-                type="button"
-                className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]"
-              >
-                SA
-              </button>
-            </div>
-          </header>
-
-          <section className="mt-6 flex flex-col items-stretch justify-between gap-5 rounded-[18px] border border-amber-400/25 bg-[linear-gradient(180deg,rgba(248,176,45,0.08),rgba(248,176,45,0.03)),#171116] px-7 py-7 shadow-[0_14px_34px_rgba(0,0,0,0.18)] xl:flex-row xl:items-center">
+          <section className="mt-10 flex flex-col items-stretch justify-between gap-4 rounded-[14px] border border-amber-400/25 bg-[radial-gradient(circle_at_top_left,rgba(255,181,49,0.14),transparent_34%),linear-gradient(100deg,#1a1410_0%,#151018_58%,#100b12_100%)] px-5 py-5 shadow-[0_14px_34px_rgba(0,0,0,0.18)] xl:flex-row xl:items-center">
             <div>
               <span className="text-[13px] tracking-[0.08em] text-[#d59628]">MARCH 25, 2026 • WEDNESDAY</span>
-              <h3 className="mt-1.5 font-serif text-[32px] font-medium text-[#faf7ee]">Good Morning, Supper Admin</h3>
+              <h3 className="mt-1 font-serif text-2xl font-medium text-[#faf7ee]">Good Morning, Supper Admin</h3>
               <p className="mt-2 text-sm text-[#c18b31]">8 shows scheduled today • 78% average occupancy</p>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-xl border border-transparent bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-4 py-3 font-semibold text-[#231507]"
+                className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-3.5 py-2.5 text-sm font-semibold text-[#231507]"
                 onClick={() => onNavigate('reports')}
               >
                 <DashboardIcon name="chart" />
@@ -199,7 +177,7 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
               </button>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-4 py-3 text-[#9098b6]"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/4 px-3.5 py-2.5 text-sm text-[#9098b6]"
               >
                 <DashboardIcon name="ticket" />
                 Booking
@@ -207,23 +185,27 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
             </div>
           </section>
 
-          <section className="mt-6 grid grid-cols-1 gap-[18px] md:grid-cols-2 2xl:grid-cols-4">
-            {statCards.map((card) => (
-              <article key={card.title} className={`${panelClasses} px-[26px] py-[22px]`}>
-                <div className={`mb-4 inline-flex h-[38px] w-[38px] items-center justify-center rounded-[10px] ${cardToneClasses[card.tone]}`}>
+          <section className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
+            {statCards.map((card, index) => (
+              <article
+                key={card.title}
+                className={`${panelClasses} dashboard-enter stat-card px-5 py-4`}
+                style={{ animationDelay: `${120 + index * 80}ms` }}
+              >
+                <div className={`mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg ${cardToneClasses[card.tone]}`}>
                   <DashboardIcon name={card.icon} />
                 </div>
-                <strong className="block text-[32px] font-medium tracking-[0.04em] text-[#f8f7f3]">{card.value}</strong>
-                <span className="mt-1.5 block text-[#d1d6e7]">{card.title}</span>
+                <AnimatedStat value={card.value} prefix={card.prefix} />
+                <span className="mt-0.5 block text-sm text-[#d1d6e7]">{card.title}</span>
               </article>
             ))}
           </section>
 
-          <section className="mt-[18px] grid grid-cols-1 gap-[18px] xl:grid-cols-[minmax(0,1.7fr)_minmax(340px,0.95fr)]">
-            <article className={panelClasses}>
-              <div className="flex flex-col justify-between gap-4 px-[18px] pt-[18px] md:flex-row md:items-start">
+          <section className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(340px,0.95fr)]">
+            <article className={`${panelClasses} dashboard-enter revenue-panel`} style={{ animationDelay: '420ms' }}>
+              <div className="flex flex-col justify-between gap-3 px-4 pt-4 md:flex-row md:items-start">
                 <div>
-                  <h3 className="m-0 font-serif text-[22px] font-medium text-[#faf7ee]">Revenue Overview</h3>
+                  <h3 className="m-0 font-serif text-lg font-medium text-[#faf7ee]">Revenue Overview</h3>
                   <p className="mt-1 text-sm text-[#707997]">Monthly • 2026</p>
                 </div>
                 <div className="inline-flex gap-1 self-start rounded-[10px] border border-white/6 bg-white/4 p-1">
@@ -239,13 +221,13 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
                 </div>
               </div>
 
-              <div className="mt-3 grid min-h-[188px] grid-cols-6 items-end gap-3 border-t border-white/6 px-4 pb-[18px] pt-[34px] sm:grid-cols-8 lg:grid-cols-12 lg:gap-[22px] lg:px-[18px]">
+              <div className="mt-3 grid min-h-[168px] grid-cols-6 items-end gap-3 border-t border-white/6 px-4 pb-4 pt-7 sm:grid-cols-8 lg:grid-cols-12 lg:gap-[22px]">
                 {monthlyRevenue.map((value, index) => (
                   <div key={months[index]} className="grid justify-items-center gap-2.5">
-                    <div className="flex h-32 w-5 items-end sm:w-[26px]">
+                    <div className="flex h-28 w-5 items-end sm:w-[24px]">
                       <div
                         className="revenue-bar w-full rounded-t-md"
-                        style={{ height: `${value}%` }}
+                        style={{ '--bar-height': `${value}%`, animationDelay: `${index * 55}ms` } as CSSProperties}
                       />
                     </div>
                     <span className="text-xs text-[#76809d]">{months[index]}</span>
@@ -254,25 +236,25 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
               </div>
             </article>
 
-            <article className={`${panelClasses} flex flex-col px-[18px] py-[18px]`}>
+            <article className={`${panelClasses} dashboard-enter flex flex-col px-4 py-4`} style={{ animationDelay: '520ms' }}>
               <div>
-                <h3 className="m-0 font-serif text-[22px] font-medium text-[#faf7ee]">Occupancy</h3>
-                <p className="mt-1 text-sm text-[#707997]">All halls today</p>
+                <h3 className="m-0 font-serif text-lg font-medium text-[#faf7ee]">Occupancy</h3>
+                <p className="mt-0.5 text-xs text-[#707997]">All halls today</p>
               </div>
 
-              <div className="occupancy-ring mx-auto my-10 grid h-[148px] w-[148px] place-items-center rounded-full">
-                <div className="grid h-[108px] w-[108px] place-items-center rounded-full bg-[#111727] text-[#fbf7ef]">
-                  <strong className="text-[32px] font-medium">78 %</strong>
+              <div className="occupancy-ring mx-auto my-8 grid h-[128px] w-[128px] place-items-center rounded-full">
+                <div className="grid h-[92px] w-[92px] place-items-center rounded-full bg-[#111727] text-[#fbf7ef]">
+                  <AnimatedStat value={78} suffix=" %" className="text-2xl font-medium" />
                 </div>
               </div>
 
               <div className="mt-auto grid gap-2">
-                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-[15px] text-[#8890ad]">
+                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-sm text-[#8890ad]">
                   <span className="h-2 w-2 rounded-full bg-amber-400" />
                   <span>Booked</span>
                   <strong className="font-medium text-[#f7f7f4]">78%</strong>
                 </div>
-                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-[15px] text-[#8890ad]">
+                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-sm text-[#8890ad]">
                   <span className="h-2 w-2 rounded-full bg-[#525b77]" />
                   <span>Available</span>
                   <strong className="font-medium text-[#f7f7f4]">22%</strong>
@@ -281,32 +263,45 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
             </article>
           </section>
 
-          <section className="mt-[18px] grid grid-cols-1 gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <article className={`${panelClasses} p-[18px]`}>
+          <section className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <article className={`${panelClasses} dashboard-enter p-4`} style={{ animationDelay: '620ms' }}>
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                 <div>
-                  <h3 className="m-0 font-serif text-[22px] font-medium text-[#faf7ee]">Top Movies</h3>
-                  <p className="mt-1 text-sm text-[#707997]">By ticket sales</p>
+                  <h3 className="m-0 font-serif text-lg font-medium text-[#faf7ee]">Top Movies</h3>
+                  <p className="mt-0.5 text-xs text-[#707997]">By ticket sales</p>
                 </div>
                 <button
                   type="button"
-                  className="self-start rounded-xl border border-white/8 bg-white/4 px-3.5 py-2.5 text-[#9098b6]"
+                  className="self-start rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-sm text-[#9098b6]"
                 >
                   View All
                 </button>
               </div>
 
-              <div className="mt-[26px] grid gap-5">
-                {topMovies.map((movie) => (
-                  <div key={`${movie.title}-${movie.tickets}`} className="grid gap-2">
+              <div className="mt-5 grid gap-4">
+                {topMovies.map((movie, index) => (
+                  <div
+                    key={`${movie.title}-${movie.tickets}`}
+                    className="dashboard-list-item grid gap-2"
+                    style={{ animationDelay: `${720 + index * 80}ms` }}
+                  >
                     <div className="flex items-center justify-between gap-3 text-[#f7f6f2]">
                       <span className="truncate">🦁 {movie.title}</span>
-                      <strong>{movie.tickets}</strong>
+                      <AnimatedStat
+                        value={movie.tickets}
+                        suffix=" tkts"
+                        className="text-base font-bold text-[#f7f6f2]"
+                      />
                     </div>
-                    <div className="h-[7px] w-full overflow-hidden rounded-full bg-[#22283a]">
+                    <div className="progress-track h-[7px] w-full overflow-hidden rounded-full bg-[#22283a]">
                       <div
-                        className={`h-full rounded-full ${movieToneClasses[movie.tone]}`}
-                        style={{ width: `${movie.progress}%` }}
+                        className={`progress-fill h-full rounded-full ${movieToneClasses[movie.tone]}`}
+                        style={
+                          {
+                            '--progress-width': `${movie.progress}%`,
+                            animationDelay: `${880 + index * 90}ms`,
+                          } as CSSProperties
+                        }
                       />
                     </div>
                   </div>
@@ -314,15 +309,15 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
               </div>
             </article>
 
-            <article className={`${panelClasses} p-[18px]`}>
+            <article className={`${panelClasses} dashboard-enter p-4`} style={{ animationDelay: '700ms' }}>
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                 <div>
-                  <h3 className="m-0 font-serif text-[22px] font-medium text-[#faf7ee]">Recent Bookings</h3>
-                  <p className="mt-1 text-sm text-[#707997]">Latest booking activity</p>
+                  <h3 className="m-0 font-serif text-lg font-medium text-[#faf7ee]">Recent Bookings</h3>
+                  <p className="mt-0.5 text-xs text-[#707997]">Latest booking activity</p>
                 </div>
                 <button
                   type="button"
-                  className="self-start rounded-xl border border-white/8 bg-white/4 px-3.5 py-2.5 text-[#9098b6]"
+                  className="self-start rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-sm text-[#9098b6]"
                 >
                   View All
                 </button>
@@ -340,12 +335,23 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {bookings.map((booking) => (
-                      <tr key={booking.id}>
+                    {bookings.map((booking, index) => (
+                      <tr
+                        key={booking.id}
+                        className="booking-row"
+                        style={{ animationDelay: `${800 + index * 70}ms` }}
+                      >
                         <td className="px-3 py-3 text-[15px] text-amber-300">{booking.id}</td>
                         <td className="px-3 py-3 text-[15px] text-[#e7ebf6]">{booking.customer}</td>
                         <td className="px-3 py-3 text-[15px] text-[#e7ebf6]">{booking.movie}</td>
-                        <td className="px-3 py-3 text-[15px] text-amber-300">{booking.amount}</td>
+                        <td className="px-3 py-3 text-[15px] text-amber-300">
+                          <AnimatedStat
+                            value={booking.amount}
+                            prefix="$"
+                            decimals={2}
+                            className="text-[15px] font-medium text-amber-300"
+                          />
+                        </td>
                         <td className="px-3 py-3 text-[15px] text-[#e7ebf6]">
                           <span
                             className={`before:mr-1.5 inline-flex items-center rounded-full px-2.5 py-1 text-xs before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${statusClasses[booking.status]}`}
@@ -366,54 +372,113 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
   )
 }
 
+function AnimatedStat({
+  value,
+  prefix = '',
+  suffix = '',
+  decimals = 0,
+  className = 'block text-2xl font-medium tracking-[0.04em] text-[#f8f7f3]',
+}: {
+  value: number
+  prefix?: string
+  suffix?: string
+  decimals?: number
+  className?: string
+}) {
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    let animationFrame = 0
+    const duration = 2300
+    const startTime = performance.now()
+
+    const updateValue = (currentTime: number) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1)
+      const easedProgress = 1 - Math.pow(1 - progress, 3)
+
+      setDisplayValue(value * easedProgress)
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(updateValue)
+      }
+    }
+
+    animationFrame = requestAnimationFrame(updateValue)
+
+    return () => cancelAnimationFrame(animationFrame)
+  }, [value])
+
+  return (
+    <strong className={`stat-value ${className}`}>
+      {prefix}
+      {displayValue.toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+      {suffix}
+    </strong>
+  )
+}
+
 function NavSection({
   title,
   items,
+  activeNav,
+  setActiveNav,
   onNavigate,
 }: {
   title: string
   items: NavItem[]
+  activeNav: string
+  setActiveNav: (label: string) => void
   onNavigate?: (page: PageName) => void
 }) {
   return (
     <section className="mt-[18px] first:mt-0">
       {title ? <p className="mb-3 px-3.5 text-xs tracking-[0.08em] text-[#727b97]">{title}</p> : null}
-      <div className="grid gap-2">
-        {items.map((item) => (
+      <div className="grid gap-1.5">
+        {items.map((item) => {
+          const isActive = activeNav === item.label
+
+          return (
           <button
             key={item.label}
             type="button"
             onClick={() => {
+              setActiveNav(item.label)
               if (item.label === 'Dashboard') onNavigate?.('dashboard')
               if (item.label === 'Reports') onNavigate?.('reports')
             }}
             className={[
-              'flex w-full items-center gap-3 rounded-[10px] border-0 px-3.5 py-3 text-left text-[15px] transition duration-200',
-              item.active
-                ? 'bg-amber-400/18 text-[#f5b031] shadow-[inset_3px_0_0_#f5a623]'
-                : 'bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
+              'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
+              isActive
+                ? 'border border-white/85 bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]'
+                : 'border border-transparent bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
             ].join(' ')}
           >
-            <span className="inline-flex h-[22px] w-[22px] items-center justify-center">
+            <span
+              className={[
+                'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition duration-200',
+                isActive ? 'bg-[#4a3517] text-[#f5b031]' : 'bg-[#111725] text-[#77809c]',
+              ].join(' ')}
+            >
               <DashboardIcon name={item.icon} />
             </span>
-            {item.label}
+            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+            {item.badge ? (
+              <span
+                className={[
+                  'ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none',
+                  item.badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]',
+                ].join(' ')}
+              >
+                {item.badge}
+              </span>
+            ) : null}
           </button>
-        ))}
+        )})}
       </div>
     </section>
-  )
-}
-
-function IconButton({ label, icon }: { label: string; icon: string }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/8 bg-[#121624]/88 text-[#98a3c6]"
-    >
-      <DashboardIcon name={icon} />
-    </button>
   )
 }
 

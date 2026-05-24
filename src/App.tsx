@@ -6,11 +6,7 @@ import './App.css'
 function App() {
   const [page, setPage] = useState<'dashboard' | 'reports'>('dashboard')
 
-  if (page === 'reports') {
-    return <ReportsPage onNavigate={setPage} />
-  }
-
-  return <Dashboard onNavigate={setPage} />
+  return page === 'reports' ? <ReportsPage onNavigate={setPage} /> : <Dashboard onNavigate={setPage} />
 }
 
 export default App

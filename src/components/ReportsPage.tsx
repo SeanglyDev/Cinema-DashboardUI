@@ -1,10 +1,12 @@
-import type { ReactElement } from 'react'
+import { useState, type CSSProperties, type ReactElement } from 'react'
 import './Dashboard.css'
+import Navbar from './Navbar'
 
 type NavItem = {
   label: string
   icon: string
   active?: boolean
+  badge?: string
 }
 
 type StatTone = 'gold' | 'teal' | 'blue' | 'pink'
@@ -51,7 +53,7 @@ type PageName = 'dashboard' | 'reports'
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
 const contentItems: NavItem[] = [
-  { label: 'Movies', icon: 'film' },
+  { label: 'Movies', icon: 'film', badge: '12' },
   { label: 'Showtimes', icon: 'calendar' },
 ]
 
@@ -61,16 +63,16 @@ const venueItems: NavItem[] = [
 ]
 
 const transactionItems: NavItem[] = [
-  { label: 'Bookings', icon: 'ticket' },
+  { label: 'Bookings', icon: 'ticket', badge: '5' },
   { label: 'Payments', icon: 'wallet' },
 ]
 
-const analyticsItems: NavItem[] = [{ label: 'Reports', icon: 'chart', active: true }]
+const analyticsItems: NavItem[] = [{ label: 'Reports', icon: 'chart' }]
 
 const systemItems: NavItem[] = [
   { label: 'Users', icon: 'user' },
-  { label: 'Role & Permissions', icon: 'shield' },
-  { label: 'Notifications', icon: 'bell' },
+  { label: 'Roles & Perms', icon: 'shield' },
+  { label: 'Settings', icon: 'settings' },
 ]
 
 const statCards: StatCard[] = [
@@ -149,11 +151,13 @@ const panelClasses =
   'rounded-[18px] border border-white/6 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]'
 
 function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
+  const [activeNav, setActiveNav] = useState('Reports')
+
   return (
-    <div className="min-h-screen bg-[#05070f] text-[#f4f0e6]">
-      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:grid-cols-[274px_minmax(0,1fr)]">
-        <aside className="flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18]/90 px-3.5 py-6 lg:border-r lg:border-b-0">
-          <div className="flex items-center gap-3.5 border-b border-white/8 px-3 py-2 pb-6">
+    <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden">
+      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0 lg:grid-cols-[274px_minmax(0,1fr)]">
+        <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
+          <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
               <span className="text-lg">C</span>
             </div>
@@ -163,17 +167,17 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
             </div>
           </div>
 
-          <nav className="flex-1 pt-6">
-            <NavSection title="OVERVIEW" items={overviewItems} onNavigate={onNavigate} />
-            <NavSection title="CONTENT" items={contentItems} />
-            <NavSection title="VENUE" items={venueItems} />
-            <NavSection title="TRANSATIONS" items={transactionItems} />
+          <nav className="dashboard-scrollbar relative z-0 min-h-0 flex-1 overflow-y-auto pt-6">
+            <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
+            <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} setActiveNav={setActiveNav} />
+            <NavSection title="VENUE" items={venueItems} activeNav={activeNav} setActiveNav={setActiveNav} />
+            <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} setActiveNav={setActiveNav} />
             <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
-            <NavSection title="" items={analyticsItems} onNavigate={onNavigate} />
-            <NavSection title="SYSTEM" items={systemItems} />
+            <NavSection title="" items={analyticsItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
+            <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} setActiveNav={setActiveNav} />
           </nav>
 
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-white/4 px-3.5 py-2.5">
+          <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]">
               SA
             </div>
@@ -187,39 +191,10 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
           </div>
         </aside>
 
-        <main className="p-3.5 sm:p-5">
-          <header className="flex flex-col items-stretch justify-between gap-5 border-b border-white/8 px-1.5 pb-5 md:flex-row md:items-center">
-            <div>
-              <h2 className="m-0 font-serif text-2xl font-medium text-[#faf7ee]">Reports</h2>
-              <p className="mt-1.5 text-sm text-[#707997]">Analytics and insights</p>
-            </div>
+        <main className="content-transition dashboard-scrollbar min-h-0 px-3.5 pb-3.5 sm:px-5 sm:pb-5 lg:h-screen lg:overflow-y-auto">
+          <Navbar title="Reports" subtitle="Analytics and insights" />
 
-            <div className="flex flex-wrap items-center gap-3">
-              <label
-                className="flex h-11 w-full items-center gap-2.5 rounded-xl border border-white/8 bg-[#121624]/88 px-3.5 md:w-[248px]"
-                aria-label="Search"
-              >
-                <span className="text-[#7f87a6]">
-                  <ReportsIcon name="search" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="h-full w-full border-0 bg-transparent text-[#eef1f8] outline-none placeholder:text-[#69728e]"
-                />
-              </label>
-              <IconButton label="Notifications" icon="bell" />
-              <IconButton label="Settings" icon="settings" />
-              <button
-                type="button"
-                className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-[11px] text-[#fff5ec]"
-              >
-                SA
-              </button>
-            </div>
-          </header>
-
-          <section className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <section className="mt-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <h3 className="m-0 font-serif text-[28px] font-medium text-[#faf7ee]">Reports & Analytics</h3>
               <p className="mt-1 text-sm text-[#707997]">
@@ -284,7 +259,10 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
                 {revenueBars.map((value, index) => (
                   <div key={`${index + 1}`} className="grid justify-items-center gap-2">
                     <div className="flex h-24 w-4 items-end sm:w-5">
-                      <div className="revenue-bar w-full rounded-t-md" style={{ height: `${value}%` }} />
+                      <div
+                        className="revenue-bar w-full rounded-t-md"
+                        style={{ '--bar-height': `${value}%`, animationDelay: `${index * 35}ms` } as CSSProperties}
+                      />
                     </div>
                     <span className="text-[10px] text-[#76809d]">{index + 1}</span>
                   </div>
@@ -362,8 +340,8 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
                     </div>
                     <div className="h-[7px] w-full overflow-hidden rounded-full bg-[#22283a]">
                       <div
-                        className={`h-full rounded-full ${progressToneClasses[item.tone]}`}
-                        style={{ width: `${item.progress}%` }}
+                        className={`progress-fill h-full rounded-full ${progressToneClasses[item.tone]}`}
+                        style={{ '--progress-width': `${item.progress}%` } as CSSProperties}
                       />
                     </div>
                   </div>
@@ -480,7 +458,10 @@ function ProgressRow({ item }: { item: ProgressItem }) {
         <strong className="text-sm">{item.value}</strong>
       </div>
       <div className="h-[7px] w-full overflow-hidden rounded-full bg-[#22283a]">
-        <div className={`h-full rounded-full ${progressToneClasses[item.tone]}`} style={{ width: `${item.progress}%` }} />
+        <div
+          className={`progress-fill h-full rounded-full ${progressToneClasses[item.tone]}`}
+          style={{ '--progress-width': `${item.progress}%` } as CSSProperties}
+        />
       </div>
     </div>
   )
@@ -489,51 +470,62 @@ function ProgressRow({ item }: { item: ProgressItem }) {
 function NavSection({
   title,
   items,
+  activeNav,
+  setActiveNav,
   onNavigate,
 }: {
   title: string
   items: NavItem[]
+  activeNav: string
+  setActiveNav: (label: string) => void
   onNavigate?: (page: PageName) => void
 }) {
   return (
     <section className="mt-[18px] first:mt-0">
       {title ? <p className="mb-3 px-3.5 text-xs tracking-[0.08em] text-[#727b97]">{title}</p> : null}
       <div className="grid gap-2">
-        {items.map((item) => (
+        {items.map((item) => {
+          const isActive = activeNav === item.label
+
+          return (
           <button
             key={item.label}
             type="button"
             onClick={() => {
+              setActiveNav(item.label)
               if (item.label === 'Dashboard') onNavigate?.('dashboard')
               if (item.label === 'Reports') onNavigate?.('reports')
             }}
             className={[
-              'flex w-full items-center gap-3 rounded-[10px] border-0 px-3.5 py-3 text-left text-[15px] transition duration-200',
-              item.active
-                ? 'bg-amber-400/18 text-[#f5b031] shadow-[inset_3px_0_0_#f5a623]'
-                : 'bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
+              'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
+              isActive
+                ? 'border border-white/85 bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]'
+                : 'border border-transparent bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
             ].join(' ')}
           >
-            <span className="inline-flex h-[22px] w-[22px] items-center justify-center">
+            <span
+              className={[
+                'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition duration-200',
+                isActive ? 'bg-[#4a3517] text-[#f5b031]' : 'bg-[#111725] text-[#77809c]',
+              ].join(' ')}
+            >
               <ReportsIcon name={item.icon} />
             </span>
-            {item.label}
+            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+            {item.badge ? (
+              <span
+                className={[
+                  'ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none',
+                  item.badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]',
+                ].join(' ')}
+              >
+                {item.badge}
+              </span>
+            ) : null}
           </button>
-        ))}
+        )})}
       </div>
     </section>
-  )
-}
-
-function IconButton({ label, icon }: { label: string; icon: string }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/8 bg-[#121624]/88 text-[#98a3c6]"
-    >
-      <ReportsIcon name={icon} />
-    </button>
   )
 }
 
