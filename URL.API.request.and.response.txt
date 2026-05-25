@@ -87,6 +87,101 @@ Response:
 }
 
 ==================================================
+USERS
+==================================================
+
+1. Get All Users - Admin Token Required
+GET http://localhost:3000/api/users
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "user_id": 1,
+      "role_id": 2,
+      "role_name": "customer",
+      "name": "User Name",
+      "email": "user@example.com",
+      "profile_user": "https://example.com/profile.jpg",
+      "is_active": true,
+      "created_at": "2026-05-24T08:29:40.014Z"
+    }
+  ]
+}
+
+2. Get User By ID - Admin Token Required
+GET http://localhost:3000/api/users/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "user_id": 1,
+    "role_id": 2,
+    "role_name": "customer",
+    "name": "User Name",
+    "email": "user@example.com",
+    "profile_user": "https://example.com/profile.jpg",
+    "is_active": true,
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+3. Update User - Admin Token Required
+PUT http://localhost:3000/api/users/1
+
+Request:
+{
+  "name": "Updated User Name",
+  "email": "updated@example.com",
+  "profile_user": "https://example.com/new-profile.jpg",
+  "role_id": 2,
+  "is_active": true
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "user_id": 1,
+    "role_id": 2,
+    "name": "Updated User Name",
+    "email": "updated@example.com",
+    "profile_user": "https://example.com/new-profile.jpg",
+    "is_active": true,
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+Duplicate email response:
+{
+  "success": false,
+  "message": "Email already exists"
+}
+
+4. Delete User - Admin Token Required
+DELETE http://localhost:3000/api/users/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "User deleted"
+}
+
+Note:
+Delete user is soft delete. It sets is_active = false.
+
+==================================================
 MOVIES
 ==================================================
 
@@ -529,6 +624,209 @@ Response:
 {
   "success": true,
   "message": "Show time deleted"
+}
+
+==================================================
+BOOKINGS
+==================================================
+
+1. Get All Bookings - Admin Token Required
+GET http://localhost:3000/api/bookings
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "booking_id": 1,
+      "user_id": 2,
+      "show_time_id": 1,
+      "status": "pending",
+      "total_amount": "20.00",
+      "created_at": "2026-05-24T08:29:40.014Z",
+      "user_name": "Customer Name",
+      "user_email": "customer@example.com",
+      "movie_title": "Avengers",
+      "hall_name": "Hall A",
+      "cinema_name": "Legend Cineplex",
+      "show_date": "2026-05-25",
+      "show_time": "14:00:00"
+    }
+  ]
+}
+
+2. Get Booking By ID - Customer Owner Or Admin Token Required
+GET http://localhost:3000/api/bookings/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "booking_id": 1,
+    "user_id": 2,
+    "show_time_id": 1,
+    "status": "pending",
+    "total_amount": "20.00",
+    "created_at": "2026-05-24T08:29:40.014Z",
+    "user_name": "Customer Name",
+    "user_email": "customer@example.com",
+    "movie_title": "Avengers",
+    "hall_name": "Hall A",
+    "cinema_name": "Legend Cineplex",
+    "show_date": "2026-05-25",
+    "show_time": "14:00:00",
+    "seats": [
+      {
+        "seat_number": "A1",
+        "seat_type": "standard",
+        "price": "10.00"
+      },
+      {
+        "seat_number": "A2",
+        "seat_type": "standard",
+        "price": "10.00"
+      }
+    ]
+  }
+}
+
+3. Get Bookings By User ID - Customer Owner Or Admin Token Required
+GET http://localhost:3000/api/bookings/user/2
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "booking_id": 1,
+      "user_id": 2,
+      "show_time_id": 1,
+      "total_amount": "20.00",
+      "status": "pending",
+      "created_at": "2026-05-24T08:29:40.014Z"
+    }
+  ]
+}
+
+4. Add Booking - Customer Token Required
+POST http://localhost:3000/api/bookings
+
+Request:
+{
+  "show_time_id": 1,
+  "seat_ids": [1, 2]
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "booking_id": 1,
+    "user_id": 2,
+    "show_time_id": 1,
+    "total_amount": "20.00",
+    "status": "pending",
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+Validation responses:
+{
+  "success": false,
+  "message": "Please select at least one seat"
+}
+
+{
+  "success": false,
+  "message": "Duplicate seats are not allowed"
+}
+
+{
+  "success": false,
+  "message": "You can book a maximum of 10 seats at one time"
+}
+
+{
+  "success": false,
+  "message": "Show time not found"
+}
+
+{
+  "success": false,
+  "message": "Cannot book this show time"
+}
+
+{
+  "success": false,
+  "message": "Cannot book a show time in the past"
+}
+
+{
+  "success": false,
+  "message": "One or more seats were not found"
+}
+
+{
+  "success": false,
+  "message": "One or more seats do not belong to this show time hall"
+}
+
+{
+  "success": false,
+  "message": "One or more seats are already booked for this showtime"
+}
+
+{
+  "success": false,
+  "message": "Ticket price is not configured for one or more selected seats"
+}
+
+5. Update Booking Status - Admin Token Required
+PUT http://localhost:3000/api/bookings/1
+
+Request:
+{
+  "status": "confirmed"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "booking_id": 1,
+    "user_id": 2,
+    "show_time_id": 1,
+    "total_amount": "20.00",
+    "status": "confirmed",
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+Invalid status response:
+{
+  "success": false,
+  "message": "Invalid booking status"
+}
+
+6. Delete Booking - Admin Token Required
+DELETE http://localhost:3000/api/bookings/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Booking deleted"
 }
 
 ==================================================

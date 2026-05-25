@@ -15,7 +15,12 @@ export const PERMISSIONS = {
   SHOWTIME_CREATE: 'showtime:create',
   SHOWTIME_UPDATE: 'showtime:update',
   SHOWTIME_DELETE: 'showtime:delete',
+  BOOKING_READ: 'booking:read',
+  BOOKING_UPDATE: 'booking:update',
+  BOOKING_DELETE: 'booking:delete',
   USER_READ: 'user:read',
+  USER_UPDATE: 'user:update',
+  USER_DELETE: 'user:delete',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

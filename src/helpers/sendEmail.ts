@@ -11,9 +11,13 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendOtpEmail(to: string, otp: string, purpose = 'login') {
+  if (!to) {
+    throw new Error('OTP email recipient is not configured');
+  }
+
   const actionText = purpose === 'reset-password' ? 'reset your password' : 'login';
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: `"CinemaAdmin" <${process.env.EMAIL_USER}>`,
     to,
     subject: 'Your OTP Verification Code',
@@ -27,4 +31,10 @@ export async function sendOtpEmail(to: string, otp: string, purpose = 'login') {
       </div>
     `,
   });
+
+  if (info.rejected.length > 0) {
+    throw new Error(`OTP email was rejected for: ${info.rejected.join(', ')}`);
+  }
+
+  console.log(`OTP email sent to ${to}. Accepted: ${info.accepted.join(', ')}`);
 }

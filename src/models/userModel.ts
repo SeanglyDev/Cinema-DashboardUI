@@ -1,5 +1,5 @@
 import pool from '../config/db';
-import type { UserListItem } from '../@types/user';
+import type { UpdateUserInput, UserListItem } from '../@types/user';
 
 export async function getAllUsers(): Promise<UserListItem[]> {
   const result = await pool.query(
@@ -18,4 +18,74 @@ export async function getAllUsers(): Promise<UserListItem[]> {
   );
 
   return result.rows;
+}
+
+export async function getUserById(id: number): Promise<UserListItem | null> {
+  const result = await pool.query(
+    `SELECT
+       u.user_id,
+       u.role_id,
+       r.role_name,
+       u.name,
+       u.email,
+       u.profile_user,
+       u.is_active,
+       u.created_at
+     FROM users u
+     LEFT JOIN roles r ON r.role_id = u.role_id
+     WHERE u.user_id = $1`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function getUserByEmail(email: string): Promise<UserListItem | null> {
+  const result = await pool.query(
+    `SELECT
+       u.user_id,
+       u.role_id,
+       r.role_name,
+       u.name,
+       u.email,
+       u.profile_user,
+       u.is_active,
+       u.created_at
+     FROM users u
+     LEFT JOIN roles r ON r.role_id = u.role_id
+     WHERE LOWER(u.email) = LOWER($1)`,
+    [email]
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function updateUser(id: number, data: UpdateUserInput): Promise<UserListItem | null> {
+  const result = await pool.query(
+    `UPDATE users SET
+       role_id = COALESCE($1, role_id),
+       name = COALESCE($2, name),
+       email = COALESCE($3, email),
+       profile_user = COALESCE($4, profile_user),
+       is_active = COALESCE($5, is_active)
+     WHERE user_id = $6
+     RETURNING user_id, role_id, name, email, profile_user, is_active, created_at`,
+    [
+      data.role_id,
+      data.name,
+      data.email,
+      data.profile_user,
+      data.is_active,
+      id,
+    ]
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  await pool.query(
+    'UPDATE users SET is_active = false WHERE user_id = $1',
+    [id]
+  );
 }
