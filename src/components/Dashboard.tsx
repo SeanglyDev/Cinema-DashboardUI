@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
-import './Dashboard.css'
+import '../css/Dashboard.css'
 import Navbar from './Navbar'
 
 type NavItem = {
@@ -36,7 +36,7 @@ type BookingItem = {
   status: 'Paid' | 'Pending' | 'Cancelled'
 }
 
-type PageName = 'dashboard' | 'reports'
+type PageName = 'dashboard' | 'reports' | 'movies'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
@@ -273,6 +273,7 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
                 <button
                   type="button"
                   className="self-start rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-sm text-[#9098b6]"
+                  onClick={() => onNavigate('movies')}
                 >
                   View All
                 </button>
@@ -448,6 +449,7 @@ function NavSection({
               setActiveNav(item.label)
               if (item.label === 'Dashboard') onNavigate?.('dashboard')
               if (item.label === 'Reports') onNavigate?.('reports')
+              if (item.label === 'Movies') onNavigate?.('movies')
             }}
             className={[
               'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',

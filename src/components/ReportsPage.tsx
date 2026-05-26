@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactElement } from 'react'
-import './Dashboard.css'
+import '../css/Dashboard.css'
 import Navbar from './Navbar'
 
 type NavItem = {
@@ -48,7 +48,7 @@ type MonthlyReport = {
   tone: 'blue' | 'teal' | 'green'
 }
 
-type PageName = 'dashboard' | 'reports'
+type PageName = 'dashboard' | 'reports' | 'movies'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
@@ -495,6 +495,7 @@ function NavSection({
               setActiveNav(item.label)
               if (item.label === 'Dashboard') onNavigate?.('dashboard')
               if (item.label === 'Reports') onNavigate?.('reports')
+              if (item.label === 'Movies') onNavigate?.('movies')
             }}
             className={[
               'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',

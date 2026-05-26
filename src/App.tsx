@@ -1,16 +1,31 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Dashboard from './components/Dashboard'
 import LoginPage from './components/LoginPage'
+import MoviesPage from './components/MoviesPage'
 import ReportsPage from './components/ReportsPage'
 import TwoFactorAuthPage from './components/TwoFactorAuthPage'
 import './App.css'
 
+type PageName = 'dashboard' | 'reports' | 'movies'
+
 function App() {
-  const [page, setPage] = useState<'dashboard' | 'reports'>('dashboard')
+  const [page, setPage] = useState<PageName>(() => getPageFromHash())
   const [authStep, setAuthStep] = useState<'login' | 'otp' | 'authenticated'>(() =>
     localStorage.getItem('cinemax_token') ? 'authenticated' : 'login',
   )
   const [pendingEmail, setPendingEmail] = useState(() => localStorage.getItem('cinemax_email') ?? '')
+
+  useEffect(() => {
+    const handleHashChange = () => setPage(getPageFromHash())
+
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  const navigatePage = (nextPage: PageName) => {
+    setPage(nextPage)
+    window.location.hash = nextPage
+  }
 
   if (authStep === 'login') {
     return (
@@ -37,7 +52,18 @@ function App() {
     )
   }
 
-  return page === 'reports' ? <ReportsPage onNavigate={setPage} /> : <Dashboard onNavigate={setPage} />
+  if (page === 'reports') return <ReportsPage onNavigate={navigatePage} />
+  if (page === 'movies') return <MoviesPage onNavigate={navigatePage} />
+
+  return <Dashboard onNavigate={navigatePage} />
+}
+
+function getPageFromHash(): PageName {
+  const hashPage = window.location.hash.replace('#', '').toLowerCase()
+
+  if (hashPage === 'reports') return 'reports'
+  if (hashPage === 'movies') return 'movies'
+  return 'dashboard'
 }
 
 export default App

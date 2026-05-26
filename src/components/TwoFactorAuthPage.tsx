@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent } from 'react'
 import { AuthIcon, AuthShell } from './LoginPage'
-import './Auth.css'
+import '../css/Auth.css'
 
 type TwoFactorAuthPageProps = {
   email: string

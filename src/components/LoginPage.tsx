@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactElement } from 'react'
-import './Auth.css'
+import '../css/Auth.css'
 
 type LoginPageProps = {
   defaultEmail?: string
