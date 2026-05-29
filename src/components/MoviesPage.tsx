@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type 
 import '../css/Dashboard.css'
 import Navbar from './Navbar'
 
-type PageName = 'dashboard' | 'reports' | 'movies'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes'
 type MovieView = 'list' | 'details' | 'form'
 type MovieStatus = 'active' | 'upcoming' | 'inactive'
 
@@ -47,13 +47,18 @@ const contentItems: NavItem[] = [
 ]
 const venueItems: NavItem[] = [
   { label: 'Cinemas & Halls', icon: 'building' },
-  { label: 'Seat Manager', icon: 'users' },
+  { label: 'Seat Managers', icon: 'users' },
 ]
 const transactionItems: NavItem[] = [
   { label: 'Bookings', icon: 'ticket', badge: '5' },
   { label: 'Payments', icon: 'wallet' },
 ]
 const analyticsItems: NavItem[] = [{ label: 'Reports', icon: 'chart' }]
+const systemItems: NavItem[] = [
+  { label: 'Users', icon: 'user' },
+  { label: 'Roles & Perms', icon: 'shield' },
+  { label: 'Settings', icon: 'settings' },
+]
 
 const emptyForm = {
   title: '',
@@ -620,14 +625,12 @@ function MovieShell({
       <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0 lg:grid-cols-[274px_minmax(0,1fr)]">
         <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
           <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
-            <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
-              <MovieIcon name="clapper" />
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
+              <span className="text-lg">🎬</span>
             </div>
             <div>
-              <h1 className="m-0 font-serif text-[22px] tracking-[0.02em] text-[#f7f1e7]">
-                CINE<span className="text-[#ffce62]">MAX</span>
-              </h1>
-              <p className="mt-1 text-[11px] tracking-[0.28em] text-[#7d86a2]">ADMIN PORTAL</p>
+              <h1 className="m-0 text-base tracking-[0.08em] text-[#ffce62]">CINEMAX</h1>
+              <p className="mt-1 text-[11px] tracking-[0.08em] text-[#a3acc2]">ADMIN PORTAL</p>
             </div>
           </div>
 
@@ -636,11 +639,13 @@ function MovieShell({
             <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
             <NavSection title="VENUE" items={venueItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
             <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
-            <NavSection title="ANALYTICS" items={analyticsItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
+            <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
+            <NavSection title="" items={analyticsItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
+            <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
           </nav>
 
           <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff5f73] text-sm font-bold text-[#fff5ec]">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]">
               SA
             </div>
             <div>
@@ -676,8 +681,8 @@ function NavSection({
 }) {
   return (
     <section className="mt-[18px] first:mt-0">
-      <p className="mb-3 px-3.5 text-xs tracking-[0.18em] text-[#727b97]">{title}</p>
-      <div className="grid gap-2">
+      {title ? <p className="mb-3 px-3.5 text-xs tracking-[0.08em] text-[#727b97]">{title}</p> : null}
+      <div className="grid gap-1.5">
         {items.map((item) => {
           const isActive = activeNav === item.label
           const badge = item.label === 'Movies' ? String(movieCount || item.badge || 0) : item.badge
@@ -690,20 +695,21 @@ function NavSection({
                 if (item.label === 'Dashboard') onNavigate('dashboard')
                 if (item.label === 'Reports') onNavigate('reports')
                 if (item.label === 'Movies') onNavigate('movies')
+                if (item.label === 'Showtimes') onNavigate('showtimes')
               }}
               className={[
                 'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
                 isActive
-                  ? 'bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]'
-                  : 'text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
+                  ? 'border border-white/85 bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]'
+                  : 'border border-transparent bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
               ].join(' ')}
             >
-              <span className={['inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', isActive ? 'bg-[#4a3517]' : 'bg-[#111725]'].join(' ')}>
+              <span className={['inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition duration-200', isActive ? 'bg-[#4a3517] text-[#f5b031]' : 'bg-[#111725] text-[#77809c]'].join(' ')}>
                 <MovieIcon name={item.icon} />
               </span>
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
               {badge ? (
-                <span className={['ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold', badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>
+                <span className={['ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none', badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>
                   {badge}
                 </span>
               ) : null}
@@ -867,6 +873,24 @@ function MovieIcon({ name }: { name: string }) {
     chart: (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
         <path d="M5 19V9M10 19V5M15 19v-7M20 19v-4M3 19h18" />
+      </svg>
+    ),
+    user: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
+        <path d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+        <path d="M5 20a7 7 0 0 1 14 0" />
+      </svg>
+    ),
+    shield: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
+        <path d="M12 4 6 6.5v5.4c0 4 2.7 7.6 6 8.9 3.3-1.3 6-4.9 6-8.9V6.5L12 4Z" />
+        <path d="M12 9v6M9 12h6" />
+      </svg>
+    ),
+    settings: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
+        <path d="m12 3 1.5 2.7 3.1.4.7 3 .7.5-.7.5-.7 3-3.1.4L12 21l-1.5-2.7-3.1-.4-.7-3-.7-.5.7-.5.7-3 3.1-.4L12 3Z" />
+        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
       </svg>
     ),
     search: (

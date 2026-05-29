@@ -48,7 +48,7 @@ type MonthlyReport = {
   tone: 'blue' | 'teal' | 'green'
 }
 
-type PageName = 'dashboard' | 'reports' | 'movies'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
@@ -159,7 +159,7 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
         <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
           <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
-              <span className="text-lg">C</span>
+              <span className="text-lg">🎬</span>
             </div>
             <div>
               <h1 className="m-0 text-base tracking-[0.08em] text-[#ffce62]">CINEMAX</h1>
@@ -169,12 +169,12 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
 
           <nav className="dashboard-scrollbar relative z-0 min-h-0 flex-1 overflow-y-auto pt-6">
             <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
-            <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} setActiveNav={setActiveNav} />
-            <NavSection title="VENUE" items={venueItems} activeNav={activeNav} setActiveNav={setActiveNav} />
-            <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} setActiveNav={setActiveNav} />
+            <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
+            <NavSection title="VENUE" items={venueItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
+            <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
             <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
             <NavSection title="" items={analyticsItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
-            <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} setActiveNav={setActiveNav} />
+            <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />
           </nav>
 
           <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
@@ -496,6 +496,7 @@ function NavSection({
               if (item.label === 'Dashboard') onNavigate?.('dashboard')
               if (item.label === 'Reports') onNavigate?.('reports')
               if (item.label === 'Movies') onNavigate?.('movies')
+              if (item.label === 'Showtimes') onNavigate?.('showtimes')
             }}
             className={[
               'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
