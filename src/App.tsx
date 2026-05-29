@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CinemasPage from './components/CinemasPage'
 import Dashboard from './components/Dashboard'
 import LoginPage from './components/LoginPage'
 import MoviesPage from './components/MoviesPage'
@@ -7,7 +8,7 @@ import ShowtimesPage from './components/ShowtimesPage'
 import TwoFactorAuthPage from './components/TwoFactorAuthPage'
 import './App.css'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas'
 
 function App() {
   const [page, setPage] = useState<PageName>(() => getPageFromHash())
@@ -56,6 +57,7 @@ function App() {
   if (page === 'reports') return <ReportsPage onNavigate={navigatePage} />
   if (page === 'movies') return <MoviesPage onNavigate={navigatePage} />
   if (page === 'showtimes') return <ShowtimesPage onNavigate={navigatePage} />
+  if (page === 'cinemas') return <CinemasPage onNavigate={navigatePage} />
 
   return <Dashboard onNavigate={navigatePage} />
 }
@@ -66,6 +68,7 @@ function getPageFromHash(): PageName {
   if (hashPage === 'reports') return 'reports'
   if (hashPage === 'movies') return 'movies'
   if (hashPage === 'showtimes') return 'showtimes'
+  if (hashPage === 'cinemas') return 'cinemas'
   return 'dashboard'
 }
 
