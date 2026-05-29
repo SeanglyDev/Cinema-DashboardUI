@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "seed:test": "node scripts/seed-test-data.mjs"
   },
   "keywords": [],
   "author": "",
