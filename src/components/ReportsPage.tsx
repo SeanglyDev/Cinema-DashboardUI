@@ -48,7 +48,7 @@ type MonthlyReport = {
   tone: 'blue' | 'teal' | 'green'
 }
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'users'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
@@ -498,6 +498,8 @@ function NavSection({
               if (item.label === 'Movies') onNavigate?.('movies')
               if (item.label === 'Showtimes') onNavigate?.('showtimes')
               if (item.label === 'Cinemas & Halls') onNavigate?.('cinemas')
+              if (item.label === 'Bookings') onNavigate?.('bookings')
+              if (item.label === 'Users') onNavigate?.('users')
             }}
             className={[
               'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',

@@ -36,7 +36,7 @@ type BookingItem = {
   status: 'Paid' | 'Pending' | 'Cancelled'
 }
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'users'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
@@ -178,6 +178,7 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/4 px-3.5 py-2.5 text-sm text-[#9098b6]"
+                onClick={() => onNavigate('bookings')}
               >
                 <DashboardIcon name="ticket" />
                 Booking
@@ -449,10 +450,12 @@ function NavSection({
               setActiveNav(item.label)
               if (item.label === 'Dashboard') onNavigate?.('dashboard')
               if (item.label === 'Reports') onNavigate?.('reports')
-              if (item.label === 'Movies') onNavigate?.('movies')
-              if (item.label === 'Showtimes') onNavigate?.('showtimes')
-              if (item.label === 'Cinemas & Halls') onNavigate?.('cinemas')
-            }}
+                if (item.label === 'Movies') onNavigate?.('movies')
+                if (item.label === 'Showtimes') onNavigate?.('showtimes')
+                if (item.label === 'Cinemas & Halls') onNavigate?.('cinemas')
+                if (item.label === 'Bookings') onNavigate?.('bookings')
+                if (item.label === 'Users') onNavigate?.('users')
+              }}
             className={[
               'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
               isActive
