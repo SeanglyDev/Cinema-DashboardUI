@@ -36,7 +36,7 @@ type BookingItem = {
   status: 'Paid' | 'Pending' | 'Cancelled'
 }
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'users'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 
@@ -454,7 +454,9 @@ function NavSection({
                 if (item.label === 'Showtimes') onNavigate?.('showtimes')
                 if (item.label === 'Cinemas & Halls') onNavigate?.('cinemas')
                 if (item.label === 'Bookings') onNavigate?.('bookings')
+                if (item.label === 'Payments') onNavigate?.('payments')
                 if (item.label === 'Users') onNavigate?.('users')
+                if (item.label === 'Roles & Perms') onNavigate?.('roles')
               }}
             className={[
               'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',

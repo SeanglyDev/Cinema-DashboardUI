@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type 
 import '../css/Dashboard.css'
 import Navbar from './Navbar'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'users'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
 type MovieView = 'list' | 'details' | 'form'
 type MovieStatus = 'active' | 'upcoming' | 'inactive'
 
@@ -698,7 +698,9 @@ function NavSection({
                 if (item.label === 'Showtimes') onNavigate('showtimes')
                 if (item.label === 'Cinemas & Halls') onNavigate('cinemas')
                 if (item.label === 'Bookings') onNavigate('bookings')
-                if (item.label === 'Users') onNavigate('users')
+                if (item.label === 'Payments') onNavigate?.('payments')
+                if (item.label === 'Users') onNavigate?.('users')
+                if (item.label === 'Roles & Perms') onNavigate?.('roles')
               }}
               className={[
                 'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',

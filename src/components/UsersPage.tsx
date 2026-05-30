@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 're
 import '../css/Dashboard.css'
 import Navbar from './Navbar'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'users'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
 type UserView = 'list' | 'details' | 'form'
 
 type User = {
@@ -584,7 +584,9 @@ function navigateFromLabel(label: string, onNavigate: (page: PageName) => void) 
   if (label === 'Showtimes') onNavigate('showtimes')
   if (label === 'Cinemas & Halls') onNavigate('cinemas')
   if (label === 'Bookings') onNavigate('bookings')
+  if (label === 'Payments') onNavigate('payments')
   if (label === 'Users') onNavigate('users')
+  if (label === 'Roles & Perms') onNavigate('roles')
 }
 
 async function apiRequest<T>(endpoint: string, options: { method?: string; body?: string; auth?: boolean } = {}) {

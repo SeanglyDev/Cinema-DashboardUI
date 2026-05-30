@@ -4,13 +4,15 @@ import CinemasPage from './components/CinemasPage'
 import Dashboard from './components/Dashboard'
 import LoginPage from './components/LoginPage'
 import MoviesPage from './components/MoviesPage'
+import PaymentsPage from './components/PaymentsPage'
 import ReportsPage from './components/ReportsPage'
+import RolesPermissionsPage from './components/RolesPermissionsPage'
 import ShowtimesPage from './components/ShowtimesPage'
 import TwoFactorAuthPage from './components/TwoFactorAuthPage'
 import UsersPage from './components/UsersPage'
 import './App.css'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'users'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
 
 function App() {
   const [page, setPage] = useState<PageName>(() => getPageFromHash())
@@ -61,7 +63,9 @@ function App() {
   if (page === 'showtimes') return <ShowtimesPage onNavigate={navigatePage} />
   if (page === 'cinemas') return <CinemasPage onNavigate={navigatePage} />
   if (page === 'bookings') return <BookingsPage onNavigate={navigatePage} />
+  if (page === 'payments') return <PaymentsPage onNavigate={navigatePage} />
   if (page === 'users') return <UsersPage onNavigate={navigatePage} />
+  if (page === 'roles') return <RolesPermissionsPage onNavigate={navigatePage} />
 
   return <Dashboard onNavigate={navigatePage} />
 }
@@ -74,7 +78,9 @@ function getPageFromHash(): PageName {
   if (hashPage === 'showtimes') return 'showtimes'
   if (hashPage === 'cinemas') return 'cinemas'
   if (hashPage === 'bookings') return 'bookings'
+  if (hashPage === 'payments') return 'payments'
   if (hashPage === 'users') return 'users'
+  if (hashPage === 'roles') return 'roles'
   return 'dashboard'
 }
 
