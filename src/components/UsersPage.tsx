@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 're
 import '../css/Dashboard.css'
 import Navbar from './Navbar'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'seat-manager' | 'bookings' | 'payments' | 'users' | 'roles' | 'notifications'
 type UserView = 'list' | 'details' | 'form'
 
 type User = {
@@ -583,10 +583,12 @@ function navigateFromLabel(label: string, onNavigate: (page: PageName) => void) 
   if (label === 'Movies') onNavigate('movies')
   if (label === 'Showtimes') onNavigate('showtimes')
   if (label === 'Cinemas & Halls') onNavigate('cinemas')
+  if (label === 'Seat Manager' || label === 'Seat Managers') onNavigate('seat-manager')
   if (label === 'Bookings') onNavigate('bookings')
   if (label === 'Payments') onNavigate('payments')
   if (label === 'Users') onNavigate('users')
   if (label === 'Roles & Perms') onNavigate('roles')
+  if (label === 'Notifications') onNavigate('notifications')
 }
 
 async function apiRequest<T>(endpoint: string, options: { method?: string; body?: string; auth?: boolean } = {}) {
