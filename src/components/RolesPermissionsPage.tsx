@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
@@ -34,7 +35,6 @@ type RoleCard = {
   tone: 'gold' | 'teal' | 'blue' | 'plain'
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 const contentItems: NavItem[] = [
   { label: 'Movies', icon: 'film', badge: '12' },
@@ -210,31 +210,31 @@ function RoleAccessCard({ role, userCount }: { role: RoleCard; userCount: number
 function PageShell({ children, activeNav, onNavigate }: { children: ReactNode; activeNav: string; onNavigate: (page: PageName) => void }) {
   return (
     <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden">
-      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0 lg:grid-cols-[274px_minmax(0,1fr)]">
-        <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
-          <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
+      <div className="cinema-shell-grid grid min-h-screen bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0">
+        <aside className="cinema-sidebar">
+          <div className="cinema-sidebar-brand">
+            <div className="cinema-logo-mark">
               <AppIcon name="clapper" />
             </div>
             <div>
-              <h1 className="m-0 text-base tracking-[0.08em] text-[#ffce62]">CINEMAX</h1>
-              <p className="mt-1 text-[11px] tracking-[0.08em] text-[#a3acc2]">ADMIN PORTAL</p>
+              <h1 className="cinema-logo-title">CINE<span>MAX</span></h1>
+              <span className="cinema-logo-subtitle">ADMIN PORTAL</span>
             </div>
           </div>
-          <nav className="dashboard-scrollbar relative z-0 min-h-0 flex-1 overflow-y-auto pt-6">
+          <nav className="cinema-sidebar-nav dashboard-scrollbar">
             <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="VENUE" items={venueItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} onNavigate={onNavigate} />
-            <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
+            <div className="cinema-section-title">Analytics</div>
             <NavSection title="" items={analyticsItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} onNavigate={onNavigate} />
           </nav>
-          <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]">SA</div>
+          <div className="cinema-admin-card">
+            <div className="cinema-admin-avatar">SA</div>
             <div>
-              <strong className="block text-[15px] text-[#f7f8fb]">Super Admin</strong>
-              <span className="mt-0.5 block text-xs text-[#f0ad31]">Full Access</span>
+              <strong className="cinema-admin-name">Super Admin</strong>
+              <span className="cinema-admin-role">Full Access</span>
             </div>
             <button type="button" aria-label="Open profile menu" className="border-0 bg-transparent text-[#98a0b7]">...</button>
           </div>
@@ -247,18 +247,18 @@ function PageShell({ children, activeNav, onNavigate }: { children: ReactNode; a
 
 function NavSection({ title, items, activeNav, onNavigate }: { title: string; items: NavItem[]; activeNav: string; onNavigate: (page: PageName) => void }) {
   return (
-    <section className="mt-[18px] first:mt-0">
-      {title ? <p className="mb-3 px-3.5 text-xs tracking-[0.08em] text-[#727b97]">{title}</p> : null}
-      <div className="grid gap-1.5">
+    <section className="cinema-nav-section">
+      {title ? <p className="cinema-section-title">{title}</p> : null}
+      <div className="cinema-nav-list">
         {items.map((item) => {
           const isActive = activeNav === item.label
           return (
-            <button key={item.label} type="button" onClick={() => navigateFromLabel(item.label, onNavigate)} className={['relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200', isActive ? 'border border-white/85 bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]' : 'border border-transparent bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]'].join(' ')}>
-              <span className={['inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition duration-200', isActive ? 'bg-[#4a3517] text-[#f5b031]' : 'bg-[#111725] text-[#77809c]'].join(' ')}>
+            <button key={item.label} type="button" onClick={() => navigateFromLabel(item.label, onNavigate)} className={['cinema-nav-item', isActive ? 'is-active' : ''].join(' ')}>
+              <span className={['cinema-nav-icon', isActive ? '' : ''].join(' ')}>
                 <AppIcon name={item.icon} />
               </span>
-              <span className="min-w-0 flex-1 truncate">{item.label}</span>
-              {item.badge ? <span className={['ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none', item.badge === '5' || item.badge === '3' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>{item.badge}</span> : null}
+              <span className="cinema-nav-label">{item.label}</span>
+              {item.badge ? <span className={['cinema-nav-badge', item.badge === '5' || item.badge === '3' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>{item.badge}</span> : null}
             </button>
           )
         })}
@@ -306,7 +306,7 @@ function navigateFromLabel(label: string, onNavigate: (page: PageName) => void) 
 
 async function apiRequest<T>(endpoint: string, options: { method?: string; body?: string; auth?: boolean } = {}) {
   const token = localStorage.getItem('cinemax_token')
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(apiUrl(endpoint), {
     method: options.method ?? 'GET',
     headers: {
       'Content-Type': 'application/json',

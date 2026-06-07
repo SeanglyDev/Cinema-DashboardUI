@@ -6,6 +6,13 @@ type NavbarProps = {
 }
 
 function Navbar({ title, subtitle }: NavbarProps) {
+  const handleLogout = () => {
+    localStorage.removeItem('cinemax_token')
+    sessionStorage.removeItem('cinemax_last_password')
+    window.location.hash = ''
+    window.location.reload()
+  }
+
   return (
     <header className="sticky top-0 z-50 -mx-3 -mt-3 flex min-h-[62px] items-center justify-between gap-4 border-b border-white/8 bg-[#050813] px-6 py-2.5 shadow-[0_14px_24px_rgba(5,8,19,0.95)] sm:-mx-4 sm:-mt-4 lg:-mx-5 lg:-mt-5 lg:px-6">
       <div className="min-w-0">
@@ -30,6 +37,7 @@ function Navbar({ title, subtitle }: NavbarProps) {
 
         <NavbarButton label="Notifications" icon="bell" hasBadge />
         <NavbarButton label="Settings" icon="settings" />
+        <NavbarButton label="Logout" icon="logout" onClick={handleLogout} variant="danger" />
 
         <button
           type="button"
@@ -46,17 +54,26 @@ function Navbar({ title, subtitle }: NavbarProps) {
 function NavbarButton({
   label,
   icon,
+  onClick,
   hasBadge = false,
+  variant = 'default',
 }: {
   label: string
   icon: string
+  onClick?: () => void
   hasBadge?: boolean
+  variant?: 'default' | 'danger'
 }) {
   return (
     <button
       type="button"
       aria-label={label}
-      className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-[#101420] text-[#98a3c6]"
+      onClick={onClick}
+      className={`relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
+        variant === 'danger'
+          ? 'border-[#ff5f73]/30 bg-[#2a1119] text-[#ff8d9b] hover:border-[#ff5f73]/50 hover:bg-[#371722]'
+          : 'border-white/10 bg-[#101420] text-[#98a3c6] hover:border-white/20 hover:bg-[#151a28]'
+      }`}
     >
       <NavbarIcon name={icon} />
       {hasBadge ? (
@@ -84,6 +101,13 @@ function NavbarIcon({ name }: { name: string }) {
       <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
         <path d="m12 3 1.5 2.7 3.1.4.7 3 .7.5-.7.5-.7 3-3.1.4L12 21l-1.5-2.7-3.1-.4-.7-3-.7-.5.7-.5.7-3 3.1-.4L12 3Z" />
         <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+      </svg>
+    ),
+    logout: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
+        <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+        <path d="m15 8 4 4-4 4" />
+        <path d="M19 12H9" />
       </svg>
     ),
   }

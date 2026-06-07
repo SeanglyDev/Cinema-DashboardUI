@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactElement, type ReactNode } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
@@ -50,7 +51,6 @@ type NavItem = {
   badge?: string
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 const contentItems: NavItem[] = [
@@ -77,7 +77,7 @@ function ShowtimesPage({ onNavigate }: { onNavigate: (page: PageName) => void })
   const [showtimes, setShowtimes] = useState<Showtime[]>([])
   const [selectedShowtime, setSelectedShowtime] = useState<Showtime | null>(null)
   const [editingShowtime, setEditingShowtime] = useState<ShowtimeRaw | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
 
@@ -176,9 +176,7 @@ function ShowtimesPage({ onNavigate }: { onNavigate: (page: PageName) => void })
       {view === 'list' ? (
         <ShowtimesList
           showtimes={filteredShowtimes}
-          searchQuery={searchQuery}
           isLoading={isLoading}
-          onSearchChange={setSearchQuery}
           onAdd={() => void openForm()}
           onView={openDetails}
           onEdit={(showtime) => void openForm(showtime)}
@@ -207,42 +205,29 @@ function ShowtimesPage({ onNavigate }: { onNavigate: (page: PageName) => void })
 
 function ShowtimesList({
   showtimes,
-  searchQuery,
   isLoading,
-  onSearchChange,
   onAdd,
   onView,
   onEdit,
 }: {
   showtimes: Showtime[]
-  searchQuery: string
   isLoading: boolean
-  onSearchChange: (value: string) => void
   onAdd: () => void
   onView: (showtime: Showtime) => void
   onEdit: (showtime: Showtime) => void
 }) {
   return (
     <div className="content-transition">
-      <section className="mt-10 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+      <section className="mt-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
         <div>
-          <h1 className="m-0 font-serif text-[30px] font-semibold text-[#faf7ee]">Showtimes</h1>
-          <p className="mt-1 text-sm text-[#7b849d]">Schedule and manage all screenings</p>
+          <h1 className="m-0 font-serif text-[28px] font-semibold text-[#faf7ee]">Showtimes</h1>
+          <p className="mt-1 text-[13px] text-[#7b849d]">Schedule and manage all screenings</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex h-11 w-full min-w-0 items-center gap-2.5 rounded-lg border border-white/10 bg-[#101420] px-3 sm:w-[270px]">
-            <ShowtimeIcon name="search" />
-            <input
-              value={searchQuery}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Search..."
-              className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#eef1f8] outline-none placeholder:text-[#69728e]"
-            />
-          </label>
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-5 text-sm font-extrabold text-[#170f05] transition duration-200 hover:-translate-y-0.5"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-4 text-[13px] font-extrabold text-[#170f05] transition duration-200 hover:-translate-y-0.5"
           >
             <ShowtimeIcon name="plus" />
             Add Showtime
@@ -250,8 +235,8 @@ function ShowtimesList({
         </div>
       </section>
 
-      <section className="dashboard-enter mt-6 overflow-hidden rounded-[18px] border border-white/8 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-        <div className="grid min-w-[900px] grid-cols-[2fr_1fr_0.8fr_0.8fr_1fr_1fr_1.5fr] border-b border-white/8 px-5 py-4 text-xs font-bold uppercase tracking-[0.16em] text-[#737d9b]">
+      <section className="dashboard-enter mt-5 overflow-hidden rounded-[12px] border border-white/8 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+        <div className="grid min-w-[900px] grid-cols-[2fr_1fr_0.8fr_0.8fr_1fr_1fr_1.5fr] border-b border-white/8 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-[#737d9b]">
           <span>Movie</span>
           <span>Hall</span>
           <span>Date</span>
@@ -262,22 +247,22 @@ function ShowtimesList({
         </div>
         <div className="dashboard-scrollbar overflow-x-auto">
           {isLoading ? (
-            <div className="min-w-[900px] p-5 text-sm text-[#8f99b5]">Loading showtimes...</div>
+            <div className="min-w-[900px] p-4 text-sm text-[#8f99b5]">Loading showtimes...</div>
           ) : showtimes.length ? (
             showtimes.map((showtime, index) => (
               <div
                 key={showtime.show_time_id}
-                className="booking-row grid min-w-[900px] grid-cols-[2fr_1fr_0.8fr_0.8fr_1fr_1fr_1.5fr] items-center border-b border-white/6 px-5 py-4 last:border-b-0"
+                className="booking-row grid min-w-[900px] grid-cols-[2fr_1fr_0.8fr_0.8fr_1fr_1fr_1.5fr] items-center border-b border-white/6 px-4 py-3 last:border-b-0"
                 style={{ animationDelay: `${index * 60}ms` }}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="text-xl">{movieMark(showtime.movie_title)}</span>
-                  <strong className="truncate text-[#f2f4fb]">{showtime.movie_title}</strong>
+                  <span className="text-lg">{movieMark(showtime.movie_title)}</span>
+                  <strong className="truncate text-[13px] text-[#f2f4fb]">{showtime.movie_title}</strong>
                 </div>
-                <span className="text-[#a8b0ca]">{showtime.hall_name}</span>
-                <span className="text-[#a8b0ca]">{formatShortDate(showtime.show_date)}</span>
-                <span className="font-mono text-lg text-amber-300">{formatTime(showtime.show_time)}</span>
-                <span className="font-semibold text-[#f2f4fb]">{availability(showtime)}</span>
+                <span className="text-[13px] text-[#a8b0ca]">{showtime.hall_name}</span>
+                <span className="text-[13px] text-[#a8b0ca]">{formatShortDate(showtime.show_date)}</span>
+                <span className="font-mono text-[15px] text-amber-300">{formatTime(showtime.show_time)}</span>
+                <span className="text-[13px] font-semibold text-[#f2f4fb]">{availability(showtime)}</span>
                 <StatusBadge status={displayStatus(showtime)} />
                 <div className="flex gap-2">
                   <button type="button" onClick={() => onView(showtime)} className="inline-flex h-8 items-center gap-2 rounded-lg bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-3 text-xs font-extrabold text-[#140d04]">
@@ -413,6 +398,7 @@ function ShowtimeForm({
     show_date: normalizeDateInput(showtime?.show_date),
     show_time: normalizeTimeInput(showtime?.show_time) || '14:30',
     status: (showtime?.status as ShowtimeStatus) ?? 'active',
+    version: 'original',
   })
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
@@ -462,13 +448,13 @@ function ShowtimeForm({
   return (
     <div className="content-transition">
       <Breadcrumb current={showtime ? 'Edit Showtime' : 'Add Showtime'} />
-      <form onSubmit={submitForm} className="dashboard-enter mt-6">
-        <section className="rounded-[18px] border border-white/8 bg-[#101526] p-7 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-          <h1 className="m-0 flex items-center gap-3 border-b border-white/8 pb-5 font-serif text-xl font-semibold text-[#faf7ee]">
+      <form onSubmit={submitForm} className="dashboard-enter mt-5">
+        <section className="rounded-[14px] border border-white/8 bg-[#101526] p-6 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+          <h1 className="m-0 flex items-center gap-3 border-b border-white/8 pb-4 font-serif text-base font-semibold text-[#faf7ee]">
             <span className="text-amber-400"><ShowtimeIcon name="calendar" /></span>
             Showtime Details
           </h1>
-          <div className="mt-6 grid grid-cols-1 gap-x-5 gap-y-5 xl:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-x-4 gap-y-4 xl:grid-cols-2">
             <FormField label="Movie">
               <select value={form.movie_id} onChange={(event) => setForm({ ...form, movie_id: event.target.value })} className={inputClasses} required>
                 {movies.map((movie) => <option key={movie.movie_id} value={movie.movie_id}>{movie.title}</option>)}
@@ -492,12 +478,19 @@ function ShowtimeForm({
                 <option value="completed">Completed</option>
               </select>
             </FormField>
+            <FormField label="Version">
+              <select value={form.version} onChange={(event) => setForm({ ...form, version: event.target.value })} className={inputClasses}>
+                <option value="original">Original</option>
+                <option value="dubbed">Dubbed</option>
+                <option value="subtitled">Subtitled</option>
+              </select>
+            </FormField>
           </div>
           {error ? <div className="mt-5 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
         </section>
-        <div className="mt-5 flex justify-end gap-3">
-          <button type="button" onClick={onCancel} className="h-11 rounded-xl border border-white/10 bg-white/[0.03] px-6 text-sm font-bold text-[#a1abc8]">Cancel</button>
-          <button type="submit" disabled={isSaving} className="inline-flex h-11 items-center gap-2 rounded-xl bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-6 text-sm font-extrabold text-[#170f05]">
+        <div className="mt-4 flex justify-end gap-3">
+          <button type="button" onClick={onCancel} className="h-9 rounded-lg border border-white/10 bg-white/[0.03] px-5 text-[13px] font-bold text-[#a1abc8]">Cancel</button>
+          <button type="submit" disabled={isSaving} className="inline-flex h-9 items-center gap-2 rounded-lg bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-5 text-[13px] font-extrabold text-[#170f05]">
             <ShowtimeIcon name="check" />
             {isSaving ? 'Saving...' : 'Save'}
           </button>
@@ -518,33 +511,33 @@ function ShowtimeShell({
 }) {
   return (
     <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden">
-      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0 lg:grid-cols-[274px_minmax(0,1fr)]">
-        <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
-          <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
-              <span className="text-lg">🎬</span>
+      <div className="cinema-shell-grid grid min-h-screen bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0">
+        <aside className="cinema-sidebar">
+          <div className="cinema-sidebar-brand">
+            <div className="cinema-logo-mark">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon"><path d="M5 7h14v12H5z" /><path d="M5 11h14M8 7l2-3M13 7l2-3M18 7l2-3" /></svg>
             </div>
             <div>
-              <h1 className="m-0 text-base tracking-[0.08em] text-[#ffce62]">CINEMAX</h1>
-              <p className="mt-1 text-[11px] tracking-[0.08em] text-[#a3acc2]">ADMIN PORTAL</p>
+              <h1 className="cinema-logo-title">CINE<span>MAX</span></h1>
+              <span className="cinema-logo-subtitle">ADMIN PORTAL</span>
             </div>
           </div>
 
-          <nav className="dashboard-scrollbar relative z-0 min-h-0 flex-1 overflow-y-auto pt-6">
+          <nav className="cinema-sidebar-nav dashboard-scrollbar">
             <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="VENUE" items={venueItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} onNavigate={onNavigate} />
-            <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
+            <div className="cinema-section-title">Analytics</div>
             <NavSection title="" items={analyticsItems} activeNav={activeNav} onNavigate={onNavigate} />
             <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} onNavigate={onNavigate} />
           </nav>
 
-          <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]">SA</div>
+          <div className="cinema-admin-card">
+            <div className="cinema-admin-avatar">SA</div>
             <div>
-              <strong className="block text-[15px] text-[#f7f8fb]">Super Admin</strong>
-              <span className="mt-0.5 block text-xs text-[#f0ad31]">Full Access</span>
+              <strong className="cinema-admin-name">Super Admin</strong>
+              <span className="cinema-admin-role">Full Access</span>
             </div>
             <button type="button" aria-label="Open profile menu" className="border-0 bg-transparent text-[#98a0b7]">...</button>
           </div>
@@ -570,9 +563,9 @@ function NavSection({
   onNavigate: (page: PageName) => void
 }) {
   return (
-    <section className="mt-[18px] first:mt-0">
-      {title ? <p className="mb-3 px-3.5 text-xs tracking-[0.08em] text-[#727b97]">{title}</p> : null}
-      <div className="grid gap-1.5">
+    <section className="cinema-nav-section">
+      {title ? <p className="cinema-section-title">{title}</p> : null}
+      <div className="cinema-nav-list">
         {items.map((item) => {
           const isActive = activeNav === item.label
           return (
@@ -591,18 +584,18 @@ function NavSection({
                 if (item.label === 'Roles & Perms') onNavigate?.('roles')
               }}
               className={[
-                'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
+                'cinema-nav-item',
                 isActive
-                  ? 'border border-white/85 bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]'
-                  : 'border border-transparent bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
+                  ? 'is-active'
+                  : '',
               ].join(' ')}
             >
-              <span className={['inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition duration-200', isActive ? 'bg-[#4a3517] text-[#f5b031]' : 'bg-[#111725] text-[#77809c]'].join(' ')}>
+              <span className={['cinema-nav-icon', isActive ? '' : ''].join(' ')}>
                 <ShowtimeIcon name={item.icon} />
               </span>
-              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              <span className="cinema-nav-label">{item.label}</span>
               {item.badge ? (
-                <span className={['ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none', item.badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>
+                <span className={['cinema-nav-badge', item.badge === '5' ? 'is-pink' : 'is-amber'].join(' ')}>
                   {item.badge}
                 </span>
               ) : null}
@@ -616,7 +609,7 @@ function NavSection({
 
 function Breadcrumb({ current }: { current: string }) {
   return (
-    <div className="mt-6 flex items-center gap-3 text-sm font-bold">
+    <div className="mt-5 flex items-center gap-2.5 text-xs font-bold">
       <span className="text-amber-300">Showtimes</span>
       <span className="text-[#68728e]">›</span>
       <span className="text-[#9aa4c0]">{current}</span>
@@ -634,7 +627,7 @@ function StatusBadge({ status }: { status: 'active' | 'almost-full' | 'sold-out'
   }[status]
   const label = status === 'almost-full' ? 'Almost Full' : status === 'sold-out' ? 'Sold Out' : status
 
-  return <span className={`before:mr-1.5 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold capitalize before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${classes}`}>{label}</span>
+  return <span className={`before:mr-1.5 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold capitalize before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${classes}`}>{label}</span>
 }
 
 function MetricCard({ label, value, tone }: { label: string; value: string; tone: 'gold' | 'teal' | 'rose' }) {
@@ -673,7 +666,7 @@ function ProgressMetric({ label, value, max, suffix }: { label: string; value: n
 function FormField({ label, children }: { label: string; children: ReactElement }) {
   return (
     <label className="grid gap-2">
-      <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-amber-300">{label}</span>
+      <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-amber-300">{label}</span>
       {children}
     </label>
   )
@@ -706,7 +699,7 @@ function ShowtimeIcon({ name }: { name: string }) {
 
 async function apiRequest<T>(endpoint: string, options: { method?: string; body?: string; auth?: boolean } = {}) {
   const token = localStorage.getItem('cinemax_token')
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(apiUrl(endpoint), {
     method: options.method ?? 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -720,7 +713,7 @@ async function apiRequest<T>(endpoint: string, options: { method?: string; body?
 }
 
 const inputClasses =
-  'h-12 w-full rounded-lg border border-white/10 bg-white/[0.035] px-4 text-sm font-semibold text-[#eef1f8] outline-none transition duration-200 placeholder:text-[#69728e] focus:border-amber-400/55 focus:bg-white/[0.055] focus:ring-4 focus:ring-amber-400/10'
+  'h-10 w-full rounded-lg border border-white/10 bg-white/[0.035] px-3.5 text-sm font-semibold text-[#eef1f8] outline-none transition duration-200 placeholder:text-[#69728e] focus:border-amber-400/55 focus:bg-white/[0.055] focus:ring-4 focus:ring-amber-400/10'
 
 function displayStatus(showtime: Showtime): 'active' | 'almost-full' | 'sold-out' | 'cancelled' | 'completed' {
   if (showtime.status === 'cancelled') return 'cancelled'

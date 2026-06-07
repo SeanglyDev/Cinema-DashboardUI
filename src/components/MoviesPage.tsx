@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactElement, type ReactNode } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
@@ -38,7 +39,6 @@ type NavItem = {
   badge?: string
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 
 const overviewItems: NavItem[] = [{ label: 'Dashboard', icon: 'gauge' }]
 const contentItems: NavItem[] = [
@@ -376,25 +376,25 @@ function MovieDetailsView({
     <div className="content-transition">
       <Breadcrumb current={movie.title} />
 
-      <section className="dashboard-enter mt-6 rounded-[18px] border border-white/8 bg-[#101526] p-6 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-        <div className="grid gap-6 xl:grid-cols-[156px_minmax(0,1fr)_auto] xl:items-center">
-          <div className={`grid aspect-[0.75] w-[150px] place-items-center rounded-[14px] bg-gradient-to-br ${posterGradients[movie.movie_id % posterGradients.length]}`}>
+      <section className="dashboard-enter mt-5 rounded-[14px] border border-white/8 bg-[#101526] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+        <div className="grid gap-5 xl:grid-cols-[120px_minmax(0,1fr)_auto] xl:items-center">
+          <div className={`grid aspect-[0.75] w-[120px] place-items-center rounded-[12px] bg-gradient-to-br ${posterGradients[movie.movie_id % posterGradients.length]}`}>
             <PosterArt movie={movie} index={movie.movie_id} large />
           </div>
 
           <div className="min-w-0">
-            <h1 className="m-0 font-serif text-[34px] font-semibold text-[#faf7ee]">{movie.title}</h1>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <h1 className="m-0 font-serif text-[24px] font-semibold leading-tight text-[#faf7ee]">{movie.title}</h1>
+            <div className="mt-2 flex flex-wrap gap-2">
               <StatusBadge status={status} />
-              <span className="rounded-full bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">{movie.genre ?? 'General'}</span>
-              <span className="rounded-full bg-white/7 px-3 py-1 text-xs font-bold text-[#8f99b5]">{formatDuration(movie.duration_min)}</span>
+              <span className="rounded-full bg-amber-400/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">{movie.genre ?? 'General'}</span>
+              <span className="rounded-full bg-white/7 px-2.5 py-1 text-[11px] font-bold text-[#8f99b5]">{formatDuration(movie.duration_min)}</span>
             </div>
-            <p className="mt-6 max-w-5xl text-sm leading-6 text-[#aeb6cf]">{movie.description || 'No synopsis available.'}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <p className="mt-4 max-w-4xl text-[13px] leading-5 text-[#aeb6cf]">{movie.description || 'No synopsis available.'}</p>
+            <div className="mt-5 flex flex-wrap gap-2.5">
               <button
                 type="button"
                 onClick={onEdit}
-                className="inline-flex h-11 items-center gap-2 rounded-xl bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-5 text-sm font-extrabold text-[#170f05]"
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-4 text-[13px] font-extrabold text-[#170f05]"
               >
                 <MovieIcon name="edit" />
                 Edit Movie
@@ -402,7 +402,7 @@ function MovieDetailsView({
               <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-5 text-sm font-bold text-[#9da6c2]"
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-bold text-[#9da6c2]"
               >
                 <MovieIcon name="back" />
                 Back to List
@@ -414,7 +414,7 @@ function MovieDetailsView({
             type="button"
             onClick={deleteMovie}
             disabled={isDeleting}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-rose-400/25 bg-rose-500/12 px-5 text-sm font-bold text-rose-300"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-rose-400/25 bg-rose-500/12 px-4 text-[13px] font-bold text-rose-300"
           >
             <MovieIcon name="trash" />
             {isDeleting ? 'Deleting...' : 'Delete'}
@@ -422,17 +422,17 @@ function MovieDetailsView({
         </div>
       </section>
 
-      <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <section className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-4">
         <MetricCard label="Revenue" value={`$${(sold * 24).toLocaleString()}`} tone="gold" />
         <MetricCard label="Tickets Sold" value={sold.toLocaleString()} tone="teal" />
         <MetricCard label="IMDB Rating" value={`${getMovieRating(movie, movie.movie_id).toFixed(1)} / 10`} tone="gold" />
         <MetricCard label="Active Showtimes" value={status === 'active' ? '4' : '0'} tone="blue" />
       </section>
 
-      <section className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <article className="dashboard-enter rounded-[18px] border border-white/8 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-          <h2 className="border-b border-white/8 px-6 py-5 font-serif text-xl font-semibold text-[#faf7ee]">Movie Details</h2>
-          <div className="grid gap-0 p-6">
+      <section className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <article className="dashboard-enter rounded-[14px] border border-white/8 bg-[#101526] shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+          <h2 className="border-b border-white/8 px-5 py-4 font-serif text-base font-semibold text-[#faf7ee]">Movie Details</h2>
+          <div className="grid gap-0 px-5 py-3">
             <DetailRow label="Genre" value={movie.genre ?? 'General'} />
             <DetailRow label="Duration" value={formatDuration(movie.duration_min)} />
             <DetailRow label="Status" value={status} />
@@ -441,14 +441,14 @@ function MovieDetailsView({
           </div>
         </article>
 
-        <article className="dashboard-enter rounded-[18px] border border-white/8 bg-[#101526] p-6 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-          <h2 className="m-0 font-serif text-xl font-semibold text-[#faf7ee]">Performance</h2>
-          <div className="mt-7 grid gap-5">
+        <article className="dashboard-enter rounded-[14px] border border-white/8 bg-[#101526] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+          <h2 className="m-0 font-serif text-base font-semibold text-[#faf7ee]">Performance</h2>
+          <div className="mt-5 grid gap-4">
             <ProgressMetric label="Ticket Sales Progress" value={sold} max={target} tone="gold" />
             <ProgressMetric label="Audience Rating" value={84} max={100} suffix="%" tone="teal" />
             <ProgressMetric label="Seat Occupancy Avg" value={78} max={100} suffix="%" tone="blue" />
           </div>
-          <div className="mt-8 grid gap-4 border-t border-white/8 pt-7">
+          <div className="mt-6 grid gap-3 border-t border-white/8 pt-5">
             <DetailRow label="Hall A Revenue" value="$7,200" compact />
             <DetailRow label="Hall B Revenue" value="$3,800" compact />
           </div>
@@ -622,35 +622,35 @@ function MovieShell({
 }) {
   return (
     <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden">
-      <div className="grid min-h-screen grid-cols-1 bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0 lg:grid-cols-[274px_minmax(0,1fr)]">
-        <aside className="relative z-40 flex flex-col justify-between gap-6 border-b border-white/6 bg-[#080c18] px-3.5 py-6 lg:h-screen lg:min-h-0 lg:border-r lg:border-b-0">
-          <div className="relative z-10 flex items-center gap-3.5 border-b border-white/8 bg-[#080c18] px-3 py-2 pb-6">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#ffcb4c] to-[#f6a517] shadow-[0_12px_30px_rgba(246,165,23,0.25)]">
-              <span className="text-lg">🎬</span>
+      <div className="cinema-shell-grid grid min-h-screen bg-[radial-gradient(circle_at_top,rgba(255,178,44,0.08),transparent_22%),linear-gradient(180deg,#050813_0%,#05070f_100%)] lg:h-screen lg:min-h-0">
+        <aside className="cinema-sidebar">
+          <div className="cinema-sidebar-brand">
+            <div className="cinema-logo-mark">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon"><path d="M5 7h14v12H5z" /><path d="M5 11h14M8 7l2-3M13 7l2-3M18 7l2-3" /></svg>
             </div>
             <div>
-              <h1 className="m-0 text-base tracking-[0.08em] text-[#ffce62]">CINEMAX</h1>
-              <p className="mt-1 text-[11px] tracking-[0.08em] text-[#a3acc2]">ADMIN PORTAL</p>
+              <h1 className="cinema-logo-title">CINE<span>MAX</span></h1>
+              <span className="cinema-logo-subtitle">ADMIN PORTAL</span>
             </div>
           </div>
 
-          <nav className="dashboard-scrollbar relative z-0 min-h-0 flex-1 overflow-y-auto pt-6">
+          <nav className="cinema-sidebar-nav dashboard-scrollbar">
             <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
             <NavSection title="CONTENT" items={contentItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
             <NavSection title="VENUE" items={venueItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
             <NavSection title="TRANSACTIONS" items={transactionItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
-            <div className="mb-3 mt-[18px] px-3.5 text-xs tracking-[0.08em] text-[#727b97]">Analytics</div>
+            <div className="cinema-section-title">Analytics</div>
             <NavSection title="" items={analyticsItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
             <NavSection title="SYSTEM" items={systemItems} activeNav={activeNav} onNavigate={onNavigate} movieCount={movieCount} />
           </nav>
 
-          <div className="relative z-10 grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl bg-[#111725] px-3.5 py-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff944d] to-[#ff7a2f] text-sm text-[#fff5ec]">
+          <div className="cinema-admin-card">
+            <div className="cinema-admin-avatar">
               SA
             </div>
             <div>
-              <strong className="block text-[15px] text-[#f7f8fb]">Super Admin</strong>
-              <span className="mt-0.5 block text-xs text-[#f0ad31]">Full Access</span>
+              <strong className="cinema-admin-name">Super Admin</strong>
+              <span className="cinema-admin-role">Full Access</span>
             </div>
             <button type="button" aria-label="Open profile menu" className="border-0 bg-transparent text-[#98a0b7]">
               ...
@@ -680,9 +680,9 @@ function NavSection({
   onNavigate: (page: PageName) => void
 }) {
   return (
-    <section className="mt-[18px] first:mt-0">
-      {title ? <p className="mb-3 px-3.5 text-xs tracking-[0.08em] text-[#727b97]">{title}</p> : null}
-      <div className="grid gap-1.5">
+    <section className="cinema-nav-section">
+      {title ? <p className="cinema-section-title">{title}</p> : null}
+      <div className="cinema-nav-list">
         {items.map((item) => {
           const isActive = activeNav === item.label
           const badge = item.label === 'Movies' ? String(movieCount || item.badge || 0) : item.badge
@@ -703,18 +703,18 @@ function NavSection({
                 if (item.label === 'Roles & Perms') onNavigate?.('roles')
               }}
               className={[
-                'relative flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm transition duration-200',
+                'cinema-nav-item',
                 isActive
-                  ? 'border border-white/85 bg-[linear-gradient(90deg,rgba(245,166,35,0.26),rgba(245,166,35,0.17))] text-[#f5b031] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] before:absolute before:bottom-3 before:left-0 before:top-3 before:w-[3px] before:rounded-r-full before:bg-[#f5a623] before:content-[""]'
-                  : 'border border-transparent bg-transparent text-[#78809b] hover:bg-white/4 hover:text-[#e7ebf6]',
+                  ? 'is-active'
+                  : '',
               ].join(' ')}
             >
-              <span className={['inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition duration-200', isActive ? 'bg-[#4a3517] text-[#f5b031]' : 'bg-[#111725] text-[#77809c]'].join(' ')}>
+              <span className={['cinema-nav-icon', isActive ? '' : ''].join(' ')}>
                 <MovieIcon name={item.icon} />
               </span>
-              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              <span className="cinema-nav-label">{item.label}</span>
               {badge ? (
-                <span className={['ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none', badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>
+                <span className={['cinema-nav-badge', badge === '5' ? 'bg-[#ff4f7d] text-white' : 'bg-[#6b4512] text-[#ffc24a]'].join(' ')}>
                   {badge}
                 </span>
               ) : null}
@@ -732,7 +732,7 @@ function PosterArt({ movie, index, large = false }: { movie: Movie; index: numbe
   }
 
   return (
-    <div className={['grid place-items-center rounded-2xl bg-black/20 text-4xl shadow-[0_16px_38px_rgba(0,0,0,0.22)]', large ? 'h-24 w-24 text-5xl' : 'h-20 w-20'].join(' ')}>
+    <div className={['grid place-items-center rounded-xl bg-black/20 text-3xl shadow-[0_16px_38px_rgba(0,0,0,0.22)]', large ? 'h-16 w-16 text-4xl' : 'h-20 w-20'].join(' ')}>
       <span>{['🎬', '🚀', '🕵️', '♥', '★', '●'][index % 6]}</span>
     </div>
   )
@@ -740,7 +740,7 @@ function PosterArt({ movie, index, large = false }: { movie: Movie; index: numbe
 
 function Breadcrumb({ current }: { current: string }) {
   return (
-    <div className="mt-6 flex items-center gap-3 text-sm font-bold">
+    <div className="mt-5 flex items-center gap-2.5 text-xs font-bold">
       <span className="text-amber-300">Movies</span>
       <span className="text-[#68728e]">›</span>
       <span className="text-[#9aa4c0]">{current}</span>
@@ -756,7 +756,7 @@ function StatusBadge({ status }: { status: MovieStatus }) {
   }
 
   return (
-    <span className={`before:mr-1.5 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold capitalize before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${classes[status]}`}>
+    <span className={`before:mr-1.5 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold capitalize before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${classes[status]}`}>
       {status}
     </span>
   )
@@ -770,16 +770,16 @@ function MetricCard({ label, value, tone }: { label: string; value: string; tone
   }[tone]
 
   return (
-    <article className="dashboard-enter rounded-[16px] border border-white/8 bg-[#101526] px-6 py-5 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-      <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#717b99]">{label}</div>
-      <strong className={`mt-4 block font-serif text-2xl font-semibold ${toneClass}`}>{value}</strong>
+    <article className="dashboard-enter rounded-[12px] border border-white/8 bg-[#101526] px-5 py-4 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+      <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#717b99]">{label}</div>
+      <strong className={`mt-3 block font-serif text-lg font-semibold ${toneClass}`}>{value}</strong>
     </article>
   )
 }
 
 function DetailRow({ label, value, compact = false }: { label: string; value: string; compact?: boolean }) {
   return (
-    <div className={['flex items-center justify-between gap-4 border-b border-white/6 last:border-b-0', compact ? 'py-2 text-sm' : 'py-3'].join(' ')}>
+    <div className={['flex items-center justify-between gap-4 border-b border-white/6 last:border-b-0', compact ? 'py-1.5 text-[13px]' : 'py-2.5 text-[13px]'].join(' ')}>
       <span className="text-[#77819e]">{label}</span>
       <strong className="text-right font-semibold capitalize text-[#eef1f8]">{value}</strong>
     </div>
@@ -808,14 +808,14 @@ function ProgressMetric({
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between gap-4 text-sm font-bold text-[#eef1f8]">
+      <div className="mb-2 flex items-center justify-between gap-4 text-[12px] font-bold text-[#eef1f8]">
         <span>{label}</span>
         <span className="font-mono text-amber-300">
           {value}
           {suffix} {suffix ? '' : `/ ${max} target`}
         </span>
       </div>
-      <div className="progress-track h-[6px] overflow-hidden rounded-full bg-[#22283a]">
+      <div className="progress-track h-1 overflow-hidden rounded-full bg-[#22283a]">
         <div className={`progress-fill h-full rounded-full ${color}`} style={{ '--progress-width': `${width}%` } as CSSProperties} />
       </div>
     </div>
@@ -946,7 +946,7 @@ function MovieIcon({ name }: { name: string }) {
 
 async function apiRequest<T>(endpoint: string, options: { method?: string; body?: string; auth?: boolean } = {}) {
   const token = localStorage.getItem('cinemax_token')
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(apiUrl(endpoint), {
     method: options.method ?? 'GET',
     headers: {
       'Content-Type': 'application/json',

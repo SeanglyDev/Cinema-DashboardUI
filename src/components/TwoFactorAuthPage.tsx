@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent } from 'react'
 import { AuthIcon, AuthShell } from './LoginPage'
+import { apiUrl } from '../lib/api'
 import '../css/Auth.css'
 
 type TwoFactorAuthPageProps = {
@@ -8,7 +9,6 @@ type TwoFactorAuthPageProps = {
   onVerified: (token: string) => void
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 const OTP_LENGTH = 6
 
 function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps) {
@@ -68,7 +68,7 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
     setMessage(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
+      const response = await fetch(apiUrl('/api/auth/verify-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp_code: otpCode }),
@@ -94,7 +94,7 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
     setMessage(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -161,11 +161,11 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
           <div className="otp-resend">
             {secondsLeft > 0 ? (
               <span>
-                Resend in <span className="masked-email">{secondsLeft}s</span>
+                Resend OTP in <span className="masked-email">{secondsLeft}s</span>
               </span>
             ) : (
               <button type="button" onClick={handleResend} disabled={isResending}>
-                {isResending ? 'Sending...' : 'Resend code'}
+                {isResending ? 'Sending...' : 'Resend OTP'}
               </button>
             )}
           </div>
@@ -178,7 +178,7 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
           </button>
 
           <button className="back-link" type="button" onClick={onBack}>
-            Back to Login
+            &larr; Back to Login
           </button>
         </form>
       </section>

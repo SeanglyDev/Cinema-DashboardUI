@@ -1,12 +1,11 @@
 import { useState, type FormEvent, type ReactElement } from 'react'
+import { apiUrl } from '../lib/api'
 import '../css/Auth.css'
 
 type LoginPageProps = {
   defaultEmail?: string
   onOtpRequired: (email: string) => void
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
 
 function LoginPage({ defaultEmail = '', onOtpRequired }: LoginPageProps) {
   const [email, setEmail] = useState(defaultEmail)
@@ -22,7 +21,7 @@ function LoginPage({ defaultEmail = '', onOtpRequired }: LoginPageProps) {
     setMessage(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
