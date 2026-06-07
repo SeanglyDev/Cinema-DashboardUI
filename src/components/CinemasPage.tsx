@@ -3,7 +3,7 @@ import '../css/Dashboard.css'
 import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'seat-manager' | 'bookings' | 'payments' | 'users' | 'roles' | 'notifications'
 type CinemaView = 'list' | 'details' | 'form'
 
 type Cinema = {
@@ -42,7 +42,7 @@ const contentItems: NavItem[] = [
 ]
 const venueItems: NavItem[] = [
   { label: 'Cinemas & Halls', icon: 'building' },
-  { label: 'Seat Managers', icon: 'users' },
+  { label: 'Seat Manager', icon: 'seat' },
 ]
 const transactionItems: NavItem[] = [
   { label: 'Bookings', icon: 'ticket', badge: '5' },
@@ -564,10 +564,12 @@ function NavSection({
                 if (item.label === 'Movies') onNavigate('movies')
                 if (item.label === 'Showtimes') onNavigate('showtimes')
                 if (item.label === 'Cinemas & Halls') onNavigate('cinemas')
-                if (item.label === 'Bookings') onNavigate('bookings')
+                if (item.label === 'Seat Manager' || item.label === 'Seat Managers') onNavigate?.('seat-manager')
+                if (item.label === 'Bookings') onNavigate?.('bookings')
                 if (item.label === 'Payments') onNavigate?.('payments')
                 if (item.label === 'Users') onNavigate?.('users')
                 if (item.label === 'Roles & Perms') onNavigate?.('roles')
+                if (item.label === 'Notifications') onNavigate?.('notifications')
               }}
               className={[
                 'cinema-nav-item',
@@ -654,6 +656,7 @@ function CinemaIcon({ name }: { name: string }) {
     film: <><rect x="5" y="4" width="14" height="16" rx="2" /><path d="M9 4v16M15 4v16M5 8h4M15 8h4M5 16h4M15 16h4" /></>,
     calendar: <><rect x="4" y="6" width="16" height="14" rx="2" /><path d="M8 3v6M16 3v6M4 10h16" /></>,
     building: <path d="M4 20h16M6 20V8l6-4 6 4v12M9 12h.01M12 12h.01M15 12h.01" />,
+    seat: <path d="M7 11V6a3 3 0 0 1 6 0v5M5 11h11a3 3 0 0 1 3 3v5H5v-8Z" />,
     hall: <path d="M4 20h16M7 20V7l5-3 5 3v13M10 12h4M10 16h4" />,
     users: <path d="M8 14a3 3 0 1 1 0-6 3 3 0 0 1 0 6ZM16 13a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5ZM3.5 19a4.5 4.5 0 0 1 9 0M13 19a4 4 0 0 1 7.5-1.8" />,
     ticket: <path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4Z" />,

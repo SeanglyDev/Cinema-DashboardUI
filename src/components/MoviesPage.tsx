@@ -3,7 +3,7 @@ import '../css/Dashboard.css'
 import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'bookings' | 'payments' | 'users' | 'roles'
+type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'seat-manager' | 'bookings' | 'payments' | 'users' | 'roles' | 'notifications'
 type MovieView = 'list' | 'details' | 'form'
 type MovieStatus = 'active' | 'upcoming' | 'inactive'
 
@@ -47,7 +47,7 @@ const contentItems: NavItem[] = [
 ]
 const venueItems: NavItem[] = [
   { label: 'Cinemas & Halls', icon: 'building' },
-  { label: 'Seat Managers', icon: 'users' },
+  { label: 'Seat Manager', icon: 'seat' },
 ]
 const transactionItems: NavItem[] = [
   { label: 'Bookings', icon: 'ticket', badge: '5' },
@@ -697,10 +697,12 @@ function NavSection({
                 if (item.label === 'Movies') onNavigate('movies')
                 if (item.label === 'Showtimes') onNavigate('showtimes')
                 if (item.label === 'Cinemas & Halls') onNavigate('cinemas')
-                if (item.label === 'Bookings') onNavigate('bookings')
+                if (item.label === 'Seat Manager' || item.label === 'Seat Managers') onNavigate?.('seat-manager')
+                if (item.label === 'Bookings') onNavigate?.('bookings')
                 if (item.label === 'Payments') onNavigate?.('payments')
                 if (item.label === 'Users') onNavigate?.('users')
                 if (item.label === 'Roles & Perms') onNavigate?.('roles')
+                if (item.label === 'Notifications') onNavigate?.('notifications')
               }}
               className={[
                 'cinema-nav-item',
