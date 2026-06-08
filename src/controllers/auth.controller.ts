@@ -18,8 +18,8 @@ export async function registerController(req: Request, res: Response): Promise<v
 // =====================
 export async function loginController(req: Request, res: Response): Promise<void> {
   try {
-    const message = await login(req.body);
-    res.status(200).json({ success: true, message });
+    const result = await login(req.body);
+    res.status(200).json({ success: true, ...result });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }

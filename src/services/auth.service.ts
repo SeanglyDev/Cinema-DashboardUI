@@ -5,6 +5,7 @@ import { sendOtpEmail } from '../helpers/sendEmail';
 import type {
   RegisterInput,
   LoginInput,
+  LoginResult,
   VerifyOtpInput,
   ForgotPasswordInput,
   ResetPasswordInput,
@@ -82,7 +83,7 @@ export async function register(data: RegisterInput): Promise<string> {
 // =====================
 // LOGIN - Step 1
 // =====================
-export async function login(data: LoginInput): Promise<string> {
+export async function login(data: LoginInput): Promise<LoginResult> {
   const email = normalizeEmail(data.email);
   if (!data.password) throw new Error('Password is required');
 
@@ -125,9 +126,21 @@ export async function login(data: LoginInput): Promise<string> {
     sendToEmail = process.env.STAFF_EMAIL as string; 
   }
 
-  await sendOtpEmail(sendToEmail, otpCode);
+  try {
+    await sendOtpEmail(sendToEmail, otpCode);
+  } catch (error) {
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
 
-  return 'OTP sent to your email';
+    console.warn(`OTP email failed. Development OTP for ${email}: ${otpCode}`, error);
+    return {
+      message: 'OTP email failed locally. Use the development OTP shown on the verification page.',
+      dev_otp: otpCode,
+    };
+  }
+
+  return { message: 'OTP sent to your email' };
 }
 
 // =====================

@@ -11,6 +11,11 @@ export interface LoginInput {
   password: string;
 }
 
+export interface LoginResult {
+  message: string;
+  dev_otp?: string;
+}
+
 export interface VerifyOtpInput {
   email: string;
   otp_code: string;
