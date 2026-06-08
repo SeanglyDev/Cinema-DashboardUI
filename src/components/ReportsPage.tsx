@@ -503,12 +503,8 @@ function NavSection({
               if (item.label === 'Payments') onNavigate?.('payments')
               if (item.label === 'Users') onNavigate?.('users')
               if (item.label === 'Roles & Perms') onNavigate?.('roles')
-<<<<<<< HEAD
-              }}
-=======
               if (item.label === 'Notifications') onNavigate?.('notifications')
             }}
->>>>>>> 16eb512364f1edde95ee8a8e61ea2ecce640c890
             className={[
               'cinema-nav-item',
               isActive
@@ -566,6 +562,11 @@ function ReportsIcon({ name }: { name: string }) {
     building: (
       <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
         <path d="M4 20h16M6 20V8l6-4 6 4v12M9 12h.01M12 12h.01M15 12h.01" />
+      </svg>
+    ),
+    seat: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="dashboard-icon">
+        <path d="M7 11V6a3 3 0 0 1 6 0v5M5 11h11a3 3 0 0 1 3 3v5H5v-8Z" />
       </svg>
     ),
     users: (

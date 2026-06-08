@@ -30,15 +30,23 @@ type PageName =
 function App() {
   const [page, setPage] = useState<PageName>(() => getPageFromHash())
   const [authStep, setAuthStep] = useState<'login' | 'otp' | 'authenticated'>(() =>
-    localStorage.getItem('cinemax_token') ? 'authenticated' : 'login',
+    hasUsableToken() ? 'authenticated' : 'login',
   )
   const [pendingEmail, setPendingEmail] = useState(() => localStorage.getItem('cinemax_email') ?? '')
 
   useEffect(() => {
     const handleHashChange = () => setPage(getPageFromHash())
+    const handleAuthExpired = () => {
+      clearAuthSession()
+      setAuthStep('login')
+    }
 
     window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
+    window.addEventListener('cinemax:auth-expired', handleAuthExpired)
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+      window.removeEventListener('cinemax:auth-expired', handleAuthExpired)
+    }
   }, [])
 
   const navigatePage = (nextPage: PageName) => {
@@ -102,3 +110,25 @@ function getPageFromHash(): PageName {
 }
 
 export default App
+
+function hasUsableToken() {
+  const token = localStorage.getItem('cinemax_token')
+  if (!token) return false
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1] ?? '')) as { exp?: number }
+    if (payload.exp && payload.exp * 1000 <= Date.now()) {
+      clearAuthSession()
+      return false
+    }
+    return true
+  } catch {
+    clearAuthSession()
+    return false
+  }
+}
+
+function clearAuthSession() {
+  localStorage.removeItem('cinemax_token')
+  sessionStorage.removeItem('cinemax_last_password')
+}

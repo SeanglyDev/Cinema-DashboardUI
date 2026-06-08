@@ -602,6 +602,12 @@ async function apiRequest<T>(endpoint: string, options: { method?: string; body?
     body: options.body,
   })
   const result = (await response.json()) as ApiResponse<T>
+  if (response.status === 401 || result.message?.toLowerCase().includes('token')) {
+    localStorage.removeItem('cinemax_token')
+    sessionStorage.removeItem('cinemax_last_password')
+    window.dispatchEvent(new Event('cinemax:auth-expired'))
+    throw new Error('Session expired. Please sign in again, then create the user.')
+  }
   if (!response.ok || !result.success) throw new Error(result.message ?? 'Request failed')
   return result.data as T
 }

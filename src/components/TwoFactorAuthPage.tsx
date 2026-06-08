@@ -12,7 +12,8 @@ type TwoFactorAuthPageProps = {
 const OTP_LENGTH = 6
 
 function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps) {
-  const [otp, setOtp] = useState(Array.from({ length: OTP_LENGTH }, () => ''))
+  const devOtp = sessionStorage.getItem('cinemax_dev_otp')
+  const [otp, setOtp] = useState(() => digitsFromCode(devOtp))
   const [secondsLeft, setSecondsLeft] = useState(27)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResending, setIsResending] = useState(false)
@@ -80,6 +81,7 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
       }
 
       localStorage.setItem('cinemax_token', data.token)
+      sessionStorage.removeItem('cinemax_dev_otp')
       setMessage({ type: 'success', text: 'Verified. Opening dashboard...' })
       onVerified(data.token)
     } catch (error) {
@@ -108,8 +110,14 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
         throw new Error('Please go back and sign in again to request a new code.')
       }
 
+      if (data.dev_otp) {
+        sessionStorage.setItem('cinemax_dev_otp', data.dev_otp)
+      } else {
+        sessionStorage.removeItem('cinemax_dev_otp')
+      }
+
       setSecondsLeft(27)
-      setOtp(Array.from({ length: OTP_LENGTH }, () => ''))
+      setOtp(digitsFromCode(data.dev_otp))
       inputRefs.current[0]?.focus()
       setMessage({ type: 'success', text: data.message ?? 'New OTP sent.' })
     } catch (error) {
@@ -159,6 +167,11 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
           </div>
 
           <div className="otp-resend">
+            {devOtp ? (
+              <span>
+                Development OTP <span className="masked-email">{devOtp}</span>
+              </span>
+            ) : null}
             {secondsLeft > 0 ? (
               <span>
                 Resend OTP in <span className="masked-email">{secondsLeft}s</span>
@@ -184,6 +197,11 @@ function TwoFactorAuthPage({ email, onBack, onVerified }: TwoFactorAuthPageProps
       </section>
     </AuthShell>
   )
+}
+
+function digitsFromCode(code: string | null) {
+  const cleanCode = (code ?? '').replace(/\D/g, '').slice(0, OTP_LENGTH)
+  return Array.from({ length: OTP_LENGTH }, (_, index) => cleanCode[index] ?? '')
 }
 
 function maskEmail(email: string) {

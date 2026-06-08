@@ -38,6 +38,12 @@ function LoginPage({ defaultEmail = '', onOtpRequired }: LoginPageProps) {
         localStorage.removeItem('cinemax_email')
       }
 
+      if (data.dev_otp) {
+        sessionStorage.setItem('cinemax_dev_otp', data.dev_otp)
+      } else {
+        sessionStorage.removeItem('cinemax_dev_otp')
+      }
+
       sessionStorage.setItem('cinemax_last_password', password)
       setMessage({ type: 'success', text: data.message ?? 'OTP sent to your email' })
       onOtpRequired(email)
