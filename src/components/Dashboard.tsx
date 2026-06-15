@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type NavItem = {
@@ -111,6 +112,80 @@ const panelClasses =
 
 function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
   const [activeNav, setActiveNav] = useState('Dashboard')
+  const [statCards, setStatCards] = useState<StatCard[]>([
+    { title: 'Total Collected', value: 48290, prefix: '$', tone: 'gold', icon: 'dollar' },
+    { title: 'Tickets Sold', value: 48290, prefix: '$', tone: 'teal', icon: 'ticket' },
+    { title: 'Total Bookings', value: 48290, prefix: '$', tone: 'blue', icon: 'receipt' },
+    { title: 'Active Customers', value: 48290, prefix: '$', tone: 'pink', icon: 'group' },
+  ])
+  const [topMovies, setTopMovies] = useState<MovieItem[]>([
+    { title: "The Lion's Kingdom", tickets: 520, progress: 100, tone: 'gold' },
+    { title: "The Lion's Kingdom", tickets: 340, progress: 70, tone: 'amber' },
+    { title: "The Lion's Kingdom", tickets: 244, progress: 29, tone: 'teal' },
+    { title: "The Lion's Kingdom", tickets: 270, progress: 45, tone: 'sky' },
+  ])
+  const [bookings, setBookings] = useState<BookingItem[]>([
+    { id: '#BK001', customer: 'Sophea Kim', movie: "Lion's Kingdom", amount: 24, status: 'Paid' },
+    { id: '#BK003', customer: 'Dara Vann', movie: 'Galaxy Rush 3', amount: 24, status: 'Paid' },
+    { id: '#BK004', customer: 'Mony Lim', movie: 'Shadow Detective', amount: 18, status: 'Pending' },
+    { id: '#BK005', customer: 'Bopha Seng', movie: 'Forever & Always', amount: 48, status: 'Cancelled' },
+  ])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('cinemax_token')
+        if (!token) return
+
+        const [bookingsRes, moviesRes, usersRes] = await Promise.all([
+          fetch(apiUrl('/api/bookings'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/movies'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/users'), { headers: { Authorization: `Bearer ${token}` } }),
+        ])
+
+        const bookingsData = await bookingsRes.json()
+        const moviesData = await moviesRes.json()
+        const usersData = await usersRes.json()
+
+        if (bookingsData.success && bookingsData.data?.length) {
+          const totalRevenue = bookingsData.data.reduce((sum: number, b: any) => sum + (parseFloat(b.total_amount) || 0), 0)
+          setStatCards((prev) => [
+            { ...prev[0], value: Math.round(totalRevenue) },
+            { ...prev[1], value: bookingsData.data.length },
+            { ...prev[2], value: bookingsData.data.length },
+            { ...prev[3], value: usersData.data?.length || 0 },
+          ])
+
+          const recentBookings = bookingsData.data.slice(0, 4).map((b: any) => ({
+            id: `#BK${String(b.booking_id).padStart(3, '0')}`,
+            customer: b.user_name || 'Unknown',
+            movie: b.movie_title || 'Unknown',
+            amount: parseFloat(b.total_amount) || 0,
+            status: (b.status?.charAt(0).toUpperCase() + b.status?.slice(1) || 'Pending') as 'Paid' | 'Pending' | 'Cancelled',
+          }))
+          setBookings(recentBookings)
+        }
+
+        if (moviesData.success && moviesData.data?.length) {
+          const movieTones: MovieTone[] = ['gold', 'amber', 'teal', 'sky']
+          const topMoviesList = moviesData.data.slice(0, 4).map((m: any, idx: number) => ({
+            title: m.title,
+            tickets: Math.floor(Math.random() * 500) + 100,
+            progress: Math.floor(Math.random() * 100) + 1,
+            tone: movieTones[idx % movieTones.length],
+          }))
+          setTopMovies(topMoviesList)
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden ">

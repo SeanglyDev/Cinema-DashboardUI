@@ -1,5 +1,6 @@
-import { useState, type CSSProperties, type ReactElement } from 'react'
+import { useState, useEffect, type CSSProperties, type ReactElement } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type NavItem = {
@@ -152,6 +153,37 @@ const panelClasses =
 
 function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
   const [activeNav, setActiveNav] = useState('Reports')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('cinemax_token')
+        if (!token) return
+
+        const [bookingsRes, moviesRes, cinemasRes, usersRes] = await Promise.all([
+          fetch(apiUrl('/api/bookings'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/movies'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/cinemas'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/users'), { headers: { Authorization: `Bearer ${token}` } }),
+        ])
+
+        const bookingsData = await bookingsRes.json()
+        const moviesData = await moviesRes.json()
+        const cinemasData = await cinemasRes.json()
+        const usersData = await usersRes.json()
+
+        // Process if needed - data will be available for use
+        console.log('Reports data loaded:', { bookingsData, moviesData, cinemasData, usersData })
+      } catch (error) {
+        console.error('Error fetching reports data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#05070f] text-[#f4f0e6] lg:h-screen lg:overflow-hidden">
