@@ -118,6 +118,17 @@ const panelClasses =
 function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
   const [activeNav, setActiveNav] = useState('Reports')
   const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<StatCard[]>([
+    { title: 'Total Collected', value: '$0', tone: 'gold', icon: 'dollar' },
+    { title: 'Tickets Sold', value: '0', tone: 'teal', icon: 'ticket' },
+    { title: 'Total Bookings', value: '0', tone: 'blue', icon: 'receipt' },
+    { title: 'Total Customers', value: '0', tone: 'pink', icon: 'group' },
+  ])
+  const [breakdown, setBreakdown] = useState<BreakdownItem[]>([])
+  const [moviePopularity, setMoviePopularity] = useState<ProgressItem[]>([])
+  const [hallRevenue, setHallRevenue] = useState<HallRevenue[]>([])
+  const [monthlyReport, setMonthlyReport] = useState<MonthlyReport[]>([])
+  const [seatOccupancy, setSeatOccupancy] = useState<ProgressItem[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,8 +148,66 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
         const cinemasData = await cinemasRes.json()
         const usersData = await usersRes.json()
 
-        // Process if needed - data will be available for use
-        console.log('Reports data loaded:', { bookingsData, moviesData, cinemasData, usersData })
+        // Process bookings for stats
+        if (bookingsData.success && bookingsData.data?.length) {
+          const totalRevenue = bookingsData.data.reduce((sum: number, b: any) => sum + (parseFloat(b.total_amount) || 0), 0)
+          const totalTickets = bookingsData.data.length
+          const paidBookings = bookingsData.data.filter((b: any) => b.status === 'paid').length
+
+          setStats([
+            { title: 'Total Collected', value: `$${Math.round(totalRevenue).toLocaleString()}`, tone: 'gold', icon: 'dollar' },
+            { title: 'Tickets Sold', value: String(totalTickets), tone: 'teal', icon: 'ticket' },
+            { title: 'Total Bookings', value: String(paidBookings), tone: 'blue', icon: 'receipt' },
+            { title: 'Total Customers', value: String(usersData.data?.length || 0), tone: 'pink', icon: 'group' },
+          ])
+
+          // Build breakdown
+          const breakdownData = [
+            { label: 'Morning 10:00-12:30', value: `$${Math.round(totalRevenue * 0.25)}` },
+            { label: 'Afternoon 13:00-16:30', value: `$${Math.round(totalRevenue * 0.35)}` },
+            { label: 'Evening 18:00-20:30', value: `$${Math.round(totalRevenue * 0.40)}`, highlight: true },
+            { label: 'Total Tickets', value: String(totalTickets), highlight: true },
+          ]
+          setBreakdown(breakdownData)
+        }
+
+        // Process movies
+        if (moviesData.success && moviesData.data?.length) {
+          const movieTones: ProgressItem['tone'][] = ['gold', 'amber', 'teal', 'sky']
+          const popularity = moviesData.data.slice(0, 4).map((m: any, idx: number) => ({
+            title: m.title,
+            value: `${Math.floor(Math.random() * 500) + 100} tkts`,
+            progress: Math.floor(Math.random() * 100) + 1,
+            tone: movieTones[idx % movieTones.length],
+          }))
+          setMoviePopularity(popularity)
+        }
+
+        // Process cinemas and halls
+        if (cinemasData.success && cinemasData.data?.length) {
+          const hallTones: HallRevenue['tone'][] = ['gold', 'teal', 'blue']
+          const hallData = cinemasData.data.slice(0, 3).map((c: any, idx: number) => ({
+            label: c.name || 'Hall ' + (idx + 1),
+            amount: `$${Math.round(Math.random() * 20000 + 5000)}`,
+            shows: `${Math.floor(Math.random() * 100) + 50} seats`,
+            tone: hallTones[idx % hallTones.length],
+          }))
+          setHallRevenue(hallData)
+        }
+
+        // Mock seat occupancy
+        setSeatOccupancy([
+          { title: 'Premium', value: '85% full', progress: 85, tone: 'gold' },
+          { title: 'Standard', value: '72% full', progress: 72, tone: 'teal' },
+          { title: 'Economy', value: '65% full', progress: 65, tone: 'sky' },
+        ])
+
+        // Mock monthly report
+        setMonthlyReport([
+          { month: 'January', revenue: '$4,200', tickets: '350', avgDay: '$135', topMovie: 'Iron Fist', occupancy: '65%', tone: 'blue' },
+          { month: 'February', revenue: '$5,100', tickets: '258', avgDay: '$170', topMovie: 'Forever', occupancy: '81%', tone: 'teal' },
+          { month: 'March', revenue: '$5,200', tickets: '414', avgDay: '$167', topMovie: 'Shadow Det.', occupancy: '83%', tone: 'green' },
+        ])
       } catch (error) {
         console.error('Error fetching reports data:', error)
       } finally {
@@ -184,114 +253,6 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
             <button type="button" aria-label="Open profile menu" className="border-0 bg-transparent text-[#98a0b7]">
               ...
             </button>
-  const [stats, setStats] = useState<StatCard[]>([
-    { title: 'Total Collected', value: '$0', tone: 'gold', icon: 'dollar' },
-    { title: 'Tickets Sold', value: '0', tone: 'teal', icon: 'ticket' },
-    { title: 'Total Bookings', value: '0', tone: 'blue', icon: 'receipt' },
-    { title: 'Total Customers', value: '0', tone: 'pink', icon: 'group' },
-  ])
-  const [breakdown, setBreakdown] = useState<BreakdownItem[]>([])
-  const [moviePopularity, setMoviePopularity] = useState<ProgressItem[]>([])
-  const [hallRevenue, setHallRevenue] = useState<HallRevenue[]>([])
-  const [monthlyReport, setMonthlyReport] = useState<MonthlyReport[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchReportsData = async () => {
-      try {
-        setLoading(true)
-        const token = localStorage.getItem('cinemax_token')
-
-        // Fetch bookings for stats
-        const bookingsRes = await fetch(apiUrl('/api/bookings'), {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const bookingsData = await bookingsRes.json()
-
-        // Fetch movies
-        const moviesRes = await fetch(apiUrl('/api/movies'), {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const moviesData = await moviesRes.json()
-
-        // Fetch cinemas and halls
-        const cinemasRes = await fetch(apiUrl('/api/cinemas'), {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const cinemasData = await cinemasRes.json()
-
-        // Fetch users
-        const usersRes = await fetch(apiUrl('/api/users'), {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const usersData = await usersRes.json()
-
-        // Process bookings
-        if (bookingsData.success && bookingsData.data) {
-          const totalRevenue = bookingsData.data.reduce((sum: number, b: any) => sum + (parseFloat(b.total_amount) || 0), 0)
-          const totalTickets = bookingsData.data.length
-          const paidBookings = bookingsData.data.filter((b: any) => b.status === 'paid').length
-
-          setStats([
-            { ...stats[0], value: `$${Math.round(totalRevenue).toLocaleString()}` },
-            { ...stats[1], value: String(totalTickets) },
-            { ...stats[2], value: String(paidBookings) },
-            { ...stats[3], value: String(usersData.data?.length || 0) },
-          ])
-
-          // Build breakdown
-          const breakdownData = [
-            { label: 'Morning 10:00-12:30', value: `$${Math.round(totalRevenue * 0.25)}` },
-            { label: 'Afternoon 13:00-16:30', value: `$${Math.round(totalRevenue * 0.35)}` },
-            { label: 'Evening 18:00-20:30', value: `$${Math.round(totalRevenue * 0.40)}`, highlight: true },
-            { label: 'Total Tickets', value: String(totalTickets), highlight: true },
-            { label: 'Online Sales', value: '60%' },
-            { label: 'Walk-In Sales', value: '20%' },
-            { label: 'Cancellations', value: String(bookingsData.data.filter((b: any) => b.status === 'cancelled').length) },
-            { label: 'Net Revenue', value: `$${Math.round(totalRevenue * 0.95)}`, highlight: true },
-          ]
-          setBreakdown(breakdownData)
-        }
-
-        // Process movies
-        if (moviesData.success && moviesData.data) {
-          const movieTones: ProgressItem['tone'][] = ['gold', 'amber', 'teal', 'sky']
-          const popularity = moviesData.data.slice(0, 4).map((m: any, idx: number) => ({
-            title: m.title,
-            value: `${Math.floor(Math.random() * 500) + 100} tkts`,
-            progress: Math.floor(Math.random() * 100) + 1,
-            tone: movieTones[idx % movieTones.length],
-          }))
-          setMoviePopularity(popularity)
-        }
-
-        // Process cinemas and halls
-        if (cinemasData.success && cinemasData.data) {
-          const hallTones: HallRevenue['tone'][] = ['gold', 'teal', 'blue']
-          const hallData = cinemasData.data.slice(0, 3).map((c: any, idx: number) => ({
-            label: c.name || 'Hall ' + (idx + 1),
-            amount: `$${Math.round(Math.random() * 20000 + 5000)}`,
-            shows: `${Math.floor(Math.random() * 100) + 50} seats`,
-            tone: hallTones[idx % hallTones.length],
-          }))
-          setHallRevenue(hallData)
-        }
-
-        // Mock monthly report
-        setMonthlyReport([
-          { month: 'January', revenue: '$4,200', tickets: '350', avgDay: '$135', topMovie: 'Iron Fist', occupancy: '65%', tone: 'blue' },
-          { month: 'February', revenue: '$5,100', tickets: '258', avgDay: '$170', topMovie: 'Forever', occupancy: '81%', tone: 'teal' },
-          { month: 'March', revenue: '$5,200', tickets: '414', avgDay: '$167', topMovie: 'Shadow Det.', occupancy: '83%', tone: 'green' },
-        ])
-      } catch (error) {
-        console.error('Error fetching reports data:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchReportsData()
-  }, [])
           </div>
         </aside>
 
