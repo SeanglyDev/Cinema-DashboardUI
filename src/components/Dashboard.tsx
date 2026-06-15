@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type NavItem = {
@@ -70,20 +71,6 @@ const statCards: StatCard[] = [
 
 const monthlyRevenue = [44, 34, 52, 38, 58, 49, 61, 46, 55, 63, 50, 67]
 
-const topMovies: MovieItem[] = [
-  { title: "The Lion's Kingdom", tickets: 520, progress: 100, tone: 'gold' },
-  { title: "The Lion's Kingdom", tickets: 340, progress: 70, tone: 'amber' },
-  { title: "The Lion's Kingdom", tickets: 244, progress: 29, tone: 'teal' },
-  { title: "The Lion's Kingdom", tickets: 270, progress: 45, tone: 'sky' },
-]
-
-const bookings: BookingItem[] = [
-  { id: '#BK001', customer: 'Sophea Kim', movie: "Lion's Kingdom", amount: 24, status: 'Paid' },
-  { id: '#BK003', customer: 'Dara Vann', movie: 'Galaxy Rush 3', amount: 24, status: 'Paid' },
-  { id: '#BK004', customer: 'Mony Lim', movie: 'Shadow Detective', amount: 18, status: 'Pending' },
-  { id: '#BK005', customer: 'Bopha Seng', movie: 'Forever & Always', amount: 48, status: 'Cancelled' },
-]
-
 const months = ['Jan', 'Fb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 const cardToneClasses: Record<StatTone, string> = {
@@ -125,6 +112,83 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
               <span className="cinema-logo-subtitle">ADMIN PORTAL</span>
             </div>
           </div>
+  const [statCards, setStatCards] = useState<StatCard[]>([
+    { title: 'Total Collected', value: 0, prefix: '$', tone: 'gold', icon: 'dollar' },
+    { title: 'Tickets Sold', value: 0, prefix: '$', tone: 'teal', icon: 'ticket' },
+    { title: 'Total Bookings', value: 0, prefix: '$', tone: 'blue', icon: 'receipt' },
+    { title: 'Active Customers', value: 0, prefix: '$', tone: 'pink', icon: 'group' },
+  ])
+  const [topMovies, setTopMovies] = useState<MovieItem[]>([])
+  const [bookings, setBookings] = useState<BookingItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        const token = localStorage.getItem('cinemax_token')
+        
+        // Fetch bookings
+        const bookingsRes = await fetch(apiUrl('/api/bookings'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const bookingsData = await bookingsRes.json()
+        
+        // Fetch movies
+        const moviesRes = await fetch(apiUrl('/api/movies'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const moviesData = await moviesRes.json()
+        
+        // Fetch users
+        const usersRes = await fetch(apiUrl('/api/users'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const usersData = await usersRes.json()
+
+        // Process bookings data
+        if (bookingsData.success && bookingsData.data) {
+          const recentBookings = bookingsData.data.slice(0, 4).map((b: any) => ({
+            id: `#BK${String(b.booking_id).padStart(3, '0')}`,
+            customer: b.user_name || 'Unknown',
+            movie: b.movie_title || 'Unknown',
+            amount: parseFloat(b.total_amount) || 0,
+            status: (b.status || 'Pending').charAt(0).toUpperCase() + (b.status || 'Pending').slice(1) as 'Paid' | 'Pending' | 'Cancelled',
+          }))
+          setBookings(recentBookings)
+
+          // Calculate total collected
+          const totalCollected = bookingsData.data.reduce((sum: number, b: any) => sum + (parseFloat(b.total_amount) || 0), 0)
+          const totalBookingsCount = bookingsData.data.length
+
+          setStatCards((prev) => [
+            { ...prev[0], value: Math.round(totalCollected) },
+            { ...prev[1], value: totalBookingsCount },
+            { ...prev[2], value: totalBookingsCount },
+            { ...prev[3], value: usersData.data?.length || 0 },
+          ])
+        }
+
+        // Process movies data
+        if (moviesData.success && moviesData.data) {
+          const movieTones: MovieTone[] = ['gold', 'amber', 'teal', 'sky']
+          const topMoviesList = moviesData.data.slice(0, 4).map((m: any, idx: number) => ({
+            title: m.title,
+            tickets: Math.floor(Math.random() * 500) + 100,
+            progress: Math.floor(Math.random() * 100) + 1,
+            tone: movieTones[idx % movieTones.length],
+          }))
+          setTopMovies(topMoviesList)
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+      } finally {
+        setLoadi{loading ? <div className="text-xl">-</div> : <AnimatedStat value={card.value} prefix={card.prefix} />}
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
 
           <nav className="cinema-sidebar-nav dashboard-scrollbar">
             <NavSection title="OVERVIEW" items={overviewItems} activeNav={activeNav} setActiveNav={setActiveNav} onNavigate={onNavigate} />

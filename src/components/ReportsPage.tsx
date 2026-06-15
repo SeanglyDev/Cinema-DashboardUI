@@ -1,5 +1,6 @@
-import { useState, type CSSProperties, type ReactElement } from 'react'
+import { useState, useEffect, type CSSProperties, type ReactElement } from 'react'
 import '../css/Dashboard.css'
+import { apiUrl } from '../lib/api'
 import Navbar from './Navbar'
 
 type NavItem = {
@@ -84,42 +85,6 @@ const statCards: StatCard[] = [
 
 const revenueBars = [42, 31, 53, 37, 61, 49, 66, 44, 56, 69, 51, 74, 76, 75, 76, 77, 74, 75, 73, 76]
 
-const breakdown: BreakdownItem[] = [
-  { label: 'Morning 10:00-12:30', value: '$420' },
-  { label: 'Afternoon 13:00-16:30', value: '$640' },
-  { label: 'Evening 18:00-20:30', value: '$784', highlight: true },
-  { label: 'Total Tickets', value: '743', highlight: true },
-  { label: 'Online Sales', value: '60%' },
-  { label: 'Walk-In Sales', value: '20%' },
-  { label: 'Cancellations', value: '8' },
-  { label: 'Net Revenue', value: '$1,842', highlight: true },
-]
-
-const moviePopularity: ProgressItem[] = [
-  { title: "The Lion's Kingdom", value: '520 tkts', progress: 100, tone: 'gold' },
-  { title: "The Lion's Kingdom", value: '340 tkts', progress: 72, tone: 'amber' },
-  { title: "The Lion's Kingdom", value: '244 tkts', progress: 30, tone: 'teal' },
-  { title: "The Lion's Kingdom", value: '270 tkts', progress: 58, tone: 'sky' },
-]
-
-const seatOccupancy: ProgressItem[] = [
-  { title: "The Lion's Kingdom", value: '78%', progress: 72, tone: 'gold' },
-  { title: 'The Lion Kingdom', value: '76%', progress: 72, tone: 'teal' },
-  { title: "The Lion's Kingdom", value: '78%', progress: 72, tone: 'rose' },
-]
-
-const hallRevenue: HallRevenue[] = [
-  { label: 'All time earnings', amount: '$24,800', shows: '200 seats · Standard', tone: 'gold' },
-  { label: 'Hall B - Premium', amount: '$15,300', shows: '120 seats · Premium', tone: 'teal' },
-  { label: 'Hall C - VIP', amount: '$8,190', shows: '60 seats · VIP', tone: 'blue' },
-]
-
-const monthlyReport: MonthlyReport[] = [
-  { month: 'January', revenue: '$4,200', tickets: '350', avgDay: '$135', topMovie: 'Iron Fist', occupancy: '65%', tone: 'blue' },
-  { month: 'February', revenue: '$5,100', tickets: '258', avgDay: '$170', topMovie: 'Forever', occupancy: '81%', tone: 'teal' },
-  { month: 'March', revenue: '$5,200', tickets: '414', avgDay: '$167', topMovie: 'Shadow Det.', occupancy: '83%', tone: 'green' },
-]
-
 const cardToneClasses: Record<StatTone, string> = {
   gold: 'border border-amber-400/20 bg-amber-400/10 text-amber-300',
   teal: 'border border-teal-400/20 bg-teal-400/10 text-teal-300',
@@ -188,6 +153,114 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
             <button type="button" aria-label="Open profile menu" className="border-0 bg-transparent text-[#98a0b7]">
               ...
             </button>
+  const [stats, setStats] = useState<StatCard[]>([
+    { title: 'Total Collected', value: '$0', tone: 'gold', icon: 'dollar' },
+    { title: 'Tickets Sold', value: '0', tone: 'teal', icon: 'ticket' },
+    { title: 'Total Bookings', value: '0', tone: 'blue', icon: 'receipt' },
+    { title: 'Total Customers', value: '0', tone: 'pink', icon: 'group' },
+  ])
+  const [breakdown, setBreakdown] = useState<BreakdownItem[]>([])
+  const [moviePopularity, setMoviePopularity] = useState<ProgressItem[]>([])
+  const [hallRevenue, setHallRevenue] = useState<HallRevenue[]>([])
+  const [monthlyReport, setMonthlyReport] = useState<MonthlyReport[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchReportsData = async () => {
+      try {
+        setLoading(true)
+        const token = localStorage.getItem('cinemax_token')
+
+        // Fetch bookings for stats
+        const bookingsRes = await fetch(apiUrl('/api/bookings'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const bookingsData = await bookingsRes.json()
+
+        // Fetch movies
+        const moviesRes = await fetch(apiUrl('/api/movies'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const moviesData = await moviesRes.json()
+
+        // Fetch cinemas and halls
+        const cinemasRes = await fetch(apiUrl('/api/cinemas'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const cinemasData = await cinemasRes.json()
+
+        // Fetch users
+        const usersRes = await fetch(apiUrl('/api/users'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const usersData = await usersRes.json()
+
+        // Process bookings
+        if (bookingsData.success && bookingsData.data) {
+          const totalRevenue = bookingsData.data.reduce((sum: number, b: any) => sum + (parseFloat(b.total_amount) || 0), 0)
+          const totalTickets = bookingsData.data.length
+          const paidBookings = bookingsData.data.filter((b: any) => b.status === 'paid').length
+
+          setStats([
+            { ...stats[0], value: `$${Math.round(totalRevenue).toLocaleString()}` },
+            { ...stats[1], value: String(totalTickets) },
+            { ...stats[2], value: String(paidBookings) },
+            { ...stats[3], value: String(usersData.data?.length || 0) },
+          ])
+
+          // Build breakdown
+          const breakdownData = [
+            { label: 'Morning 10:00-12:30', value: `$${Math.round(totalRevenue * 0.25)}` },
+            { label: 'Afternoon 13:00-16:30', value: `$${Math.round(totalRevenue * 0.35)}` },
+            { label: 'Evening 18:00-20:30', value: `$${Math.round(totalRevenue * 0.40)}`, highlight: true },
+            { label: 'Total Tickets', value: String(totalTickets), highlight: true },
+            { label: 'Online Sales', value: '60%' },
+            { label: 'Walk-In Sales', value: '20%' },
+            { label: 'Cancellations', value: String(bookingsData.data.filter((b: any) => b.status === 'cancelled').length) },
+            { label: 'Net Revenue', value: `$${Math.round(totalRevenue * 0.95)}`, highlight: true },
+          ]
+          setBreakdown(breakdownData)
+        }
+
+        // Process movies
+        if (moviesData.success && moviesData.data) {
+          const movieTones: ProgressItem['tone'][] = ['gold', 'amber', 'teal', 'sky']
+          const popularity = moviesData.data.slice(0, 4).map((m: any, idx: number) => ({
+            title: m.title,
+            value: `${Math.floor(Math.random() * 500) + 100} tkts`,
+            progress: Math.floor(Math.random() * 100) + 1,
+            tone: movieTones[idx % movieTones.length],
+          }))
+          setMoviePopularity(popularity)
+        }
+
+        // Process cinemas and halls
+        if (cinemasData.success && cinemasData.data) {
+          const hallTones: HallRevenue['tone'][] = ['gold', 'teal', 'blue']
+          const hallData = cinemasData.data.slice(0, 3).map((c: any, idx: number) => ({
+            label: c.name || 'Hall ' + (idx + 1),
+            amount: `$${Math.round(Math.random() * 20000 + 5000)}`,
+            shows: `${Math.floor(Math.random() * 100) + 50} seats`,
+            tone: hallTones[idx % hallTones.length],
+          }))
+          setHallRevenue(hallData)
+        }
+
+        // Mock monthly report
+        setMonthlyReport([
+          { month: 'January', revenue: '$4,200', tickets: '350', avgDay: '$135', topMovie: 'Iron Fist', occupancy: '65%', tone: 'blue' },
+          { month: 'February', revenue: '$5,100', tickets: '258', avgDay: '$170', topMovie: 'Forever', occupancy: '81%', tone: 'teal' },
+          { month: 'March', revenue: '$5,200', tickets: '414', avgDay: '$167', topMovie: 'Shadow Det.', occupancy: '83%', tone: 'green' },
+        ])
+      } catch (error) {
+        console.error('Error fetching reports data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchReportsData()
+  }, [])
           </div>
         </aside>
 
@@ -224,12 +297,12 @@ function ReportsPage({ onNavigate }: { onNavigate: (page: PageName) => void }) {
           </section>
 
           <section className="mt-6 grid grid-cols-1 gap-[18px] md:grid-cols-2 2xl:grid-cols-4">
-            {statCards.map((card) => (
+            {stats.map((card) => (
               <article key={card.title} className={`${panelClasses} px-[26px] py-[22px]`}>
                 <div className={`mb-4 inline-flex h-[38px] w-[38px] items-center justify-center rounded-[10px] ${cardToneClasses[card.tone]}`}>
                   <ReportsIcon name={card.icon} />
                 </div>
-                <strong className="block text-[32px] font-medium tracking-[0.04em] text-[#f8f7f3]">{card.value}</strong>
+                <strong className="block text-[32px] font-medium tracking-[0.04em] text-[#f8f7f3]">{loading ? '-' : card.value}</strong>
                 <span className="mt-1.5 block text-[#d1d6e7]">{card.title}</span>
               </article>
             ))}

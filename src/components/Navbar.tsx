@@ -1,4 +1,5 @@
-import type { ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
+import { apiUrl } from '../lib/api'
 
 type NavbarProps = {
   title: string
@@ -6,6 +7,27 @@ type NavbarProps = {
 }
 
 function Navbar({ title, subtitle }: NavbarProps) {
+  const [notificationCount, setNotificationCount] = useState(0)
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem('cinemax_token')
+        const response = await fetch(apiUrl('/api/notifications'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await response.json()
+        if (data.success && Array.isArray(data.data)) {
+          setNotificationCount(data.data.length)
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+      }
+    }
+
+    fetchNotifications()
+  }, [])
+
   const handleLogout = () => {
     localStorage.removeItem('cinemax_token')
     sessionStorage.removeItem('cinemax_last_password')
@@ -35,7 +57,7 @@ function Navbar({ title, subtitle }: NavbarProps) {
           />
         </label>
 
-        <NavbarButton label="Notifications" icon="bell" hasBadge />
+        <NavbarButton label="Notifications" icon="bell" hasBadge={notificationCount > 0} badgeCount={notificationCount} />
         <NavbarButton label="Settings" icon="settings" />
         <NavbarButton label="Logout" icon="logout" onClick={handleLogout} variant="danger" />
 
@@ -56,12 +78,14 @@ function NavbarButton({
   icon,
   onClick,
   hasBadge = false,
+  badgeCount = 0,
   variant = 'default',
 }: {
   label: string
   icon: string
   onClick?: () => void
   hasBadge?: boolean
+  badgeCount?: number
   variant?: 'default' | 'danger'
 }) {
   return (
@@ -76,8 +100,10 @@ function NavbarButton({
       }`}
     >
       <NavbarIcon name={icon} />
-      {hasBadge ? (
-        <span className="absolute right-2 top-1.5 h-1.5 w-1.5 rounded-full bg-[#ff4b73] ring-2 ring-[#101420]" />
+      {hasBadge && badgeCount > 0 ? (
+        <span className="absolute right-2 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff4b73] text-[10px] font-bold text-white ring-2 ring-[#101420]">
+          {badgeCount > 9 ? '9+' : badgeCount}
+        </span>
       ) : null}
     </button>
   )
