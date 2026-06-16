@@ -1,6 +1,7 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import  './config/db'
+import './config/db';
+import { syncAuthorizationData } from './authorization/syncAuthorization';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -30,10 +31,8 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-
 import authRouter from './routes/auth.route';
 app.use('/api/auth', authRouter);
-
 
 import movieRoutes from './routes/movie.route';
 app.use('/api/movies', movieRoutes);
@@ -59,11 +58,17 @@ app.use('/api/bookings', bookingRoutes);
 import ticketRoutes from './routes/ticket.Routes';
 app.use('/api', ticketRoutes);
 
-
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from Express + TypeScript!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}🚀✅`);
-});
+syncAuthorizationData()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Authorization setup failed:', error.message);
+    process.exit(1);
+  });

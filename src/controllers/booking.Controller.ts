@@ -36,7 +36,11 @@ export async function getById(req: Request, res: Response) {
       return;
     }
 
-    if (user.role_id !== ROLES.SUPER_ADMIN && booking.user_id !== user.user_id) {
+    if (
+      user.role_id !== ROLES.SUPER_ADMIN &&
+      user.role_id !== ROLES.STAFF &&
+      booking.user_id !== user.user_id
+    ) {
       res.status(403).json({ success: false, message: 'You do not have permission' });
       return;
     }
@@ -58,7 +62,7 @@ export async function getByUserId(req: Request, res: Response) {
       return;
     }
 
-    if (user.role_id !== ROLES.SUPER_ADMIN && user.user_id !== userId) {
+    if (user.role_id !== ROLES.SUPER_ADMIN && user.role_id !== ROLES.STAFF && user.user_id !== userId) {
       res.status(403).json({ success: false, message: 'You do not have permission' });
       return;
     }
@@ -80,9 +84,9 @@ export async function create(req: Request, res: Response) {
       return;
     }
 
-    const canCreateForOthers = roleHasPermission(user.role_id, PERMISSIONS.BOOKING_CREATE);
+    const canCreateForOthers = user.role_id !== ROLES.CUSTOMER && roleHasPermission(user.role_id, PERMISSIONS.BOOKING_CREATE);
 
-    if (user.role_id !== ROLES.CUSTOMER && !canCreateForOthers) {
+    if (!roleHasPermission(user.role_id, PERMISSIONS.BOOKING_CREATE)) {
       res.status(403).json({ success: false, message: 'You do not have permission' });
       return;
     }
