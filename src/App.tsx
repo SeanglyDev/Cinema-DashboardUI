@@ -12,20 +12,8 @@ import SeatManagerPage from './components/SeatManagerPage'
 import ShowtimesPage from './components/ShowtimesPage'
 import TwoFactorAuthPage from './components/TwoFactorAuthPage'
 import UsersPage from './components/UsersPage'
+import { canAccessPage, firstAllowedPage, getCurrentRoleId, type PageName } from './lib/rbac'
 import './App.css'
-
-type PageName =
-  | 'dashboard'
-  | 'reports'
-  | 'movies'
-  | 'showtimes'
-  | 'cinemas'
-  | 'seat-manager'
-  | 'bookings'
-  | 'payments'
-  | 'users'
-  | 'roles'
-  | 'notifications'
 
 function App() {
   const [page, setPage] = useState<PageName>(() => getPageFromHash())
@@ -49,9 +37,22 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (authStep !== 'authenticated') return
+
+    const roleId = getCurrentRoleId()
+    if (canAccessPage(roleId, page)) return
+
+    const allowedPage = firstAllowedPage(roleId)
+    setPage(allowedPage)
+    window.location.hash = allowedPage
+  }, [authStep, page])
+
   const navigatePage = (nextPage: PageName) => {
-    setPage(nextPage)
-    window.location.hash = nextPage
+    const roleId = getCurrentRoleId()
+    const allowedPage = canAccessPage(roleId, nextPage) ? nextPage : firstAllowedPage(roleId)
+    setPage(allowedPage)
+    window.location.hash = allowedPage
   }
 
   if (authStep === 'login') {
@@ -79,16 +80,20 @@ function App() {
     )
   }
 
-  if (page === 'reports') return <ReportsPage onNavigate={navigatePage} />
-  if (page === 'movies') return <MoviesPage onNavigate={navigatePage} />
-  if (page === 'showtimes') return <ShowtimesPage onNavigate={navigatePage} />
-  if (page === 'cinemas') return <CinemasPage onNavigate={navigatePage} />
-  if (page === 'seat-manager') return <SeatManagerPage onNavigate={navigatePage} />
-  if (page === 'bookings') return <BookingsPage onNavigate={navigatePage} />
-  if (page === 'payments') return <PaymentsPage onNavigate={navigatePage} />
-  if (page === 'users') return <UsersPage onNavigate={navigatePage} />
-  if (page === 'roles') return <RolesPermissionsPage onNavigate={navigatePage} />
-  if (page === 'notifications') return <NotificationsPage onNavigate={navigatePage} />
+  const roleId = getCurrentRoleId()
+  const allowedPage = canAccessPage(roleId, page) ? page : firstAllowedPage(roleId)
+  if (allowedPage !== page) return null
+
+  if (allowedPage === 'reports') return <ReportsPage onNavigate={navigatePage} />
+  if (allowedPage === 'movies') return <MoviesPage onNavigate={navigatePage} />
+  if (allowedPage === 'showtimes') return <ShowtimesPage onNavigate={navigatePage} />
+  if (allowedPage === 'cinemas') return <CinemasPage onNavigate={navigatePage} />
+  if (allowedPage === 'seat-manager') return <SeatManagerPage onNavigate={navigatePage} />
+  if (allowedPage === 'bookings') return <BookingsPage onNavigate={navigatePage} />
+  if (allowedPage === 'payments') return <PaymentsPage onNavigate={navigatePage} />
+  if (allowedPage === 'users') return <UsersPage onNavigate={navigatePage} />
+  if (allowedPage === 'roles') return <RolesPermissionsPage onNavigate={navigatePage} />
+  if (allowedPage === 'notifications') return <NotificationsPage onNavigate={navigatePage} />
 
   return <Dashboard onNavigate={navigatePage} />
 }

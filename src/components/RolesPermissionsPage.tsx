@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import '../css/Dashboard.css'
 import { apiUrl } from '../lib/api'
+import { ROLE_ACTION_SUMMARY, ROLE_LABELS, ROLE_PAGE_ACCESS, ROLES, type PageName, type RoleId } from '../lib/rbac'
 import Navbar from './Navbar'
-
-type PageName = 'dashboard' | 'reports' | 'movies' | 'showtimes' | 'cinemas' | 'seat-manager' | 'bookings' | 'payments' | 'users' | 'roles' | 'notifications'
 
 type User = {
   user_id: number
@@ -27,11 +26,12 @@ type NavItem = {
 }
 
 type RoleCard = {
-  id: number
+  id: RoleId
   title: string
   icon: string
   summary: string
-  permissions: string[]
+  pages: string[]
+  actions: string[]
   tone: 'gold' | 'teal' | 'blue' | 'plain'
 }
 
@@ -58,35 +58,30 @@ const systemItems: NavItem[] = [
 
 const roleCards: RoleCard[] = [
   {
-    id: 1,
-    title: 'Super Admin',
+    id: ROLES.SUPER_ADMIN,
+    title: ROLE_LABELS[ROLES.SUPER_ADMIN],
     icon: 'crown',
     summary: 'Full system access',
-    permissions: ['All Access'],
+    pages: formatPages(ROLE_PAGE_ACCESS[ROLES.SUPER_ADMIN]),
+    actions: ROLE_ACTION_SUMMARY[ROLES.SUPER_ADMIN],
     tone: 'gold',
   },
   {
-    id: 3,
-    title: 'Manager',
-    icon: 'manager',
-    summary: 'Movies, bookings, reports',
-    permissions: ['Movies', 'Bookings', 'Reports'],
-    tone: 'teal',
-  },
-  {
-    id: 4,
-    title: 'Staff',
+    id: ROLES.STAFF,
+    title: ROLE_LABELS[ROLES.STAFF],
     icon: 'staff',
-    summary: 'Bookings and tickets',
-    permissions: ['Bookings', 'Tickets'],
+    summary: 'Operations and ticket workflow',
+    pages: formatPages(ROLE_PAGE_ACCESS[ROLES.STAFF]),
+    actions: ROLE_ACTION_SUMMARY[ROLES.STAFF],
     tone: 'blue',
   },
   {
-    id: 2,
-    title: 'Customer',
+    id: ROLES.CUSTOMER,
+    title: ROLE_LABELS[ROLES.CUSTOMER],
     icon: 'customer',
-    summary: 'Own bookings only',
-    permissions: ['View Only'],
+    summary: 'Self-service booking',
+    pages: formatPages(ROLE_PAGE_ACCESS[ROLES.CUSTOMER]),
+    actions: ROLE_ACTION_SUMMARY[ROLES.CUSTOMER],
     tone: 'plain',
   },
 ]
@@ -143,13 +138,9 @@ function RolesPermissionsPage({ onNavigate }: { onNavigate: (page: PageName) => 
           <h1 className="m-0 font-serif text-[30px] font-semibold text-[#faf7ee]">Roles & Permissions</h1>
           <p className="mt-1 text-sm text-[#7b849d]">Role-based access control</p>
         </div>
-        <button type="button" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-[#ffbb36] to-[#f2a318] px-5 text-sm font-extrabold text-[#170f05] transition duration-200 hover:-translate-y-0.5">
-          <AppIcon name="plus" />
-          Add Role
-        </button>
       </section>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <section className="mt-6 grid gap-4 xl:grid-cols-3">
         {roleCards.map((role) => (
           <RoleAccessCard key={role.title} role={role} userCount={counts[role.id] ?? 0} />
         ))}
@@ -196,13 +187,22 @@ function RoleAccessCard({ role, userCount }: { role: RoleCard; userCount: number
         </span>
       </div>
       <p className="mt-4 text-sm text-[#838ca8]">{role.summary}</p>
+      <h3 className="mb-2 mt-5 text-xs font-extrabold uppercase tracking-[0.12em] text-[#69728e]">Pages</h3>
       <div className="mt-4 flex flex-wrap gap-2">
-        {role.permissions.map((permission) => (
-          <span key={permission} className={`before:mr-1.5 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${tone.badge}`}>
-            {permission}
+        {role.pages.map((page) => (
+          <span key={page} className={`before:mr-1.5 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold before:h-[5px] before:w-[5px] before:rounded-full before:content-[''] ${tone.badge}`}>
+            {page}
           </span>
         ))}
       </div>
+      <h3 className="mb-2 mt-5 text-xs font-extrabold uppercase tracking-[0.12em] text-[#69728e]">Can Do</h3>
+      <ul className="m-0 grid gap-2 p-0 text-sm text-[#aeb6cf]">
+        {role.actions.map((action) => (
+          <li key={action} className="list-none leading-5">
+            {action}
+          </li>
+        ))}
+      </ul>
     </article>
   )
 }
@@ -304,6 +304,16 @@ function navigateFromLabel(label: string, onNavigate: (page: PageName) => void) 
   if (label === 'Users') onNavigate('users')
   if (label === 'Roles & Perms') onNavigate('roles')
   if (label === 'Notifications') onNavigate('notifications')
+}
+
+function formatPages(pages: PageName[]) {
+  return pages.map((page) => {
+    if (page === 'seat-manager') return 'Seat Manager'
+    return page
+      .split('-')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+  })
 }
 
 async function apiRequest<T>(endpoint: string, options: { method?: string; body?: string; auth?: boolean } = {}) {

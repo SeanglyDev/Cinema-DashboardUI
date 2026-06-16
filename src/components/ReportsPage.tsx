@@ -76,13 +76,6 @@ const systemItems: NavItem[] = [
   { label: 'Settings', icon: 'settings' },
 ]
 
-const statCards: StatCard[] = [
-  { title: 'Total Collected', value: '$48,290', tone: 'gold', icon: 'dollar' },
-  { title: 'Tickets Sold', value: '$48,290', tone: 'teal', icon: 'ticket' },
-  { title: 'Total Bookings', value: '$48,290', tone: 'blue', icon: 'receipt' },
-  { title: 'Total Customers', value: '$48,290', tone: 'pink', icon: 'group' },
-]
-
 const revenueBars = [42, 31, 53, 37, 61, 49, 66, 44, 56, 69, 51, 74, 76, 75, 76, 77, 74, 75, 73, 76]
 
 const cardToneClasses: Record<StatTone, string> = {

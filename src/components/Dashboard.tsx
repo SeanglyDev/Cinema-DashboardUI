@@ -62,13 +62,6 @@ const systemItems: NavItem[] = [
   { label: 'Settings', icon: 'settings' },
 ]
 
-const statCards: StatCard[] = [
-  { title: 'Total Collected', value: 48290, prefix: '$', tone: 'gold', icon: 'dollar' },
-  { title: 'Tickets Sold', value: 48290, prefix: '$', tone: 'teal', icon: 'ticket' },
-  { title: 'Total Bookings', value: 48290, prefix: '$', tone: 'blue', icon: 'receipt' },
-  { title: 'Active Customers', value: 48290, prefix: '$', tone: 'pink', icon: 'group' },
-]
-
 const monthlyRevenue = [44, 34, 52, 38, 58, 49, 61, 46, 55, 63, 50, 67]
 
 const months = ['Jan', 'Fb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -116,8 +109,6 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
     { id: '#BK004', customer: 'Mony Lim', movie: 'Shadow Detective', amount: 18, status: 'Pending' },
     { id: '#BK005', customer: 'Bopha Seng', movie: 'Forever & Always', amount: 48, status: 'Cancelled' },
   ])
-  const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -165,8 +156,6 @@ function Dashboard({ onNavigate }: { onNavigate: (page: PageName) => void }) {
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
-      } finally {
-        setLoading(false)
       }
     }
 
