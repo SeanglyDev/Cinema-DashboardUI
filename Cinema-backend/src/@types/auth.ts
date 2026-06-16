@@ -11,9 +11,24 @@ export interface LoginInput {
   password: string;
 }
 
+export interface LoginResult {
+  message: string;
+  dev_otp?: string;
+}
+
 export interface VerifyOtpInput {
   email: string;
   otp_code: string;
+}
+
+export interface ForgotPasswordInput {
+  email: string;
+}
+
+export interface ResetPasswordInput {
+  email: string;
+  otp_code: string;
+  new_password: string;
 }
 
 export interface UserFromDB {

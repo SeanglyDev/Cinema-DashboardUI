@@ -22,12 +22,14 @@ function isTokenPayload(payload: string | jwt.JwtPayload): payload is TokenPaylo
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith('Bearer ')) {
+  if (!authHeader) {
     res.status(401).json({ success: false, message: 'Bearer token is required' });
     return;
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.startsWith('Bearer ')
+    ? authHeader.slice('Bearer '.length).trim()
+    : authHeader.trim();
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!token) {

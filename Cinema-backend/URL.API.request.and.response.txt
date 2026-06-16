@@ -1,0 +1,964 @@
+BASE URL
+http://localhost:3000
+
+For admin routes, add this header:
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+==================================================
+AUTH
+==================================================
+
+1. Register
+POST http://localhost:3000/api/auth/register
+
+Request:
+{
+  "name": "User Name",
+  "email": "user@example.com",
+  "password": "password123",
+  "profile_user": "https://example.com/profile.jpg"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Register successful! Please login."
+}
+
+2. Login
+POST http://localhost:3000/api/auth/login
+
+Request:
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
+Response:
+{
+  "success": true,
+  "message": "OTP sent to your email"
+}
+
+3. Verify OTP
+POST http://localhost:3000/api/auth/verify-otp
+
+Request:
+{
+  "email": "user@example.com",
+  "otp_code": "123456"
+}
+
+Response:
+{
+  "success": true,
+  "token": "JWT_TOKEN_HERE"
+}
+
+4. Forgot Password
+POST http://localhost:3000/api/auth/forgot-password
+
+Request:
+{
+  "email": "user@example.com"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Password reset OTP sent to your email"
+}
+
+5. Reset Password
+POST http://localhost:3000/api/auth/reset-password
+
+Request:
+{
+  "email": "user@example.com",
+  "otp_code": "123456",
+  "new_password": "newpassword123"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Password reset successful. Please login with your new password."
+}
+
+==================================================
+USERS
+==================================================
+
+1. Get All Users - Admin Token Required
+GET http://localhost:3000/api/users
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "user_id": 1,
+      "role_id": 2,
+      "role_name": "customer",
+      "name": "User Name",
+      "email": "user@example.com",
+      "profile_user": "https://example.com/profile.jpg",
+      "is_active": true,
+      "created_at": "2026-05-24T08:29:40.014Z"
+    }
+  ]
+}
+
+2. Get User By ID - Admin Token Required
+GET http://localhost:3000/api/users/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "user_id": 1,
+    "role_id": 2,
+    "role_name": "customer",
+    "name": "User Name",
+    "email": "user@example.com",
+    "profile_user": "https://example.com/profile.jpg",
+    "is_active": true,
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+3. Update User - Admin Token Required
+PUT http://localhost:3000/api/users/1
+
+Request:
+{
+  "name": "Updated User Name",
+  "email": "updated@example.com",
+  "profile_user": "https://example.com/new-profile.jpg",
+  "role_id": 2,
+  "is_active": true
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "user_id": 1,
+    "role_id": 2,
+    "name": "Updated User Name",
+    "email": "updated@example.com",
+    "profile_user": "https://example.com/new-profile.jpg",
+    "is_active": true,
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+Duplicate email response:
+{
+  "success": false,
+  "message": "Email already exists"
+}
+
+4. Delete User - Admin Token Required
+DELETE http://localhost:3000/api/users/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "User deleted"
+}
+
+Note:
+Delete user is soft delete. It sets is_active = false.
+
+==================================================
+MOVIES
+==================================================
+
+1. Get All Movies
+GET http://localhost:3000/api/movies
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Movie By ID
+GET http://localhost:3000/api/movies/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "movie_id": 1,
+    "poster_url": "https://example.com/poster.jpg",
+    "title": "Movie Title",
+    "genre": "Action",
+    "duration_min": 120,
+    "status": "active",
+    "description": "Movie description",
+    "created_at": "2026-05-23T00:00:00.000Z"
+  }
+}
+
+3. Add Movie - Admin Token Required
+POST http://localhost:3000/api/movies
+
+Request:
+{
+  "poster_url": "https://example.com/poster.jpg",
+  "title": "Movie Title",
+  "genre": "Action",
+  "duration_min": 120,
+  "status": "active",
+  "description": "Movie description"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "movie_id": 1,
+    "title": "Movie Title"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Movie already exists"
+}
+
+4. Update Movie - Admin Token Required
+PUT http://localhost:3000/api/movies/1
+
+Request:
+{
+  "title": "Updated Movie Title",
+  "genre": "Drama",
+  "duration_min": 130,
+  "status": "active",
+  "description": "Updated description",
+  "poster_url": "https://example.com/new-poster.jpg"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "movie_id": 1,
+    "title": "Updated Movie Title"
+  }
+}
+
+5. Delete Movie - Admin Token Required
+DELETE http://localhost:3000/api/movies/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Movie deleted"
+}
+
+==================================================
+CINEMAS
+==================================================
+
+1. Get All Cinemas
+GET http://localhost:3000/api/cinemas
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Cinema By ID
+GET http://localhost:3000/api/cinemas/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "cinema_id": 1,
+    "name": "Cinema Name",
+    "location": "Phnom Penh",
+    "contact": "012345678",
+    "created_at": "2026-05-23T00:00:00.000Z"
+  }
+}
+
+3. Add Cinema - Admin Token Required
+POST http://localhost:3000/api/cinemas
+
+Request:
+{
+  "name": "Cinema Name",
+  "location": "Phnom Penh",
+  "contact": "012345678"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "cinema_id": 1,
+    "name": "Cinema Name"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Cinema already exists"
+}
+
+4. Update Cinema - Admin Token Required
+PUT http://localhost:3000/api/cinemas/1
+
+Request:
+{
+  "name": "Updated Cinema Name",
+  "location": "Siem Reap",
+  "contact": "098765432"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "cinema_id": 1,
+    "name": "Updated Cinema Name"
+  }
+}
+
+5. Delete Cinema - Admin Token Required
+DELETE http://localhost:3000/api/cinemas/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Cinema deleted"
+}
+
+==================================================
+HALLS
+==================================================
+
+1. Get All Halls
+GET http://localhost:3000/api/halls
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Hall By ID
+GET http://localhost:3000/api/halls/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "hall_id": 1,
+    "cinema_id": 1,
+    "name": "Hall A",
+    "capacity": 100,
+    "created_at": "2026-05-23T00:00:00.000Z"
+  }
+}
+
+3. Get Halls By Cinema ID
+GET http://localhost:3000/api/halls/cinema/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+4. Add Hall - Admin Token Required
+POST http://localhost:3000/api/halls
+
+Request:
+{
+  "cinema_id": 1,
+  "name": "Hall A",
+  "capacity": 100
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "hall_id": 1,
+    "cinema_id": 1,
+    "name": "Hall A",
+    "capacity": 100
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Hall already exists in this cinema"
+}
+
+5. Update Hall - Admin Token Required
+PUT http://localhost:3000/api/halls/1
+
+Request:
+{
+  "name": "Hall B",
+  "capacity": 150
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "hall_id": 1,
+    "name": "Hall B",
+    "capacity": 150
+  }
+}
+
+6. Delete Hall - Admin Token Required
+DELETE http://localhost:3000/api/halls/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Hall deleted"
+}
+
+==================================================
+SHOWTIMES
+==================================================
+
+1. Get All ShowTimes
+GET http://localhost:3000/api/showtimes
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "show_time_id": 1,
+      "show_date": "2026-05-23",
+      "show_time": "14:00",
+      "status": "active",
+      "movie_title": "Avengers",
+      "movie_genre": "Action",
+      "movie_duration": 120,
+      "hall_name": "Hall A",
+      "cinema_name": "Legend Cineplex"
+    }
+  ]
+}
+
+2. Get ShowTimes By Movie ID
+GET http://localhost:3000/api/showtimes/movie/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "show_time_id": 1,
+      "show_date": "2026-05-23",
+      "show_time": "14:00",
+      "status": "active",
+      "movie_title": "Avengers",
+      "movie_genre": "Action",
+      "movie_duration": 120,
+      "hall_name": "Hall A",
+      "cinema_name": "Legend Cineplex"
+    }
+  ]
+}
+
+3. Get ShowTime By ID
+GET http://localhost:3000/api/showtimes/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "show_time_id": 1,
+    "movie_id": 1,
+    "hall_id": 1,
+    "show_date": "2026-05-23T00:00:00.000Z",
+    "show_time": "14:00:00",
+    "status": "active",
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+4. Add ShowTime - Admin Token Required
+POST http://localhost:3000/api/showtimes
+
+Request:
+{
+  "movie_id": 1,
+  "hall_id": 1,
+  "show_date": "2026-05-23",
+  "show_time": "14:00",
+  "status": "active"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "show_time_id": 1,
+    "show_date": "2026-05-23",
+    "show_time": "14:00:00",
+    "status": "active",
+    "movie_title": "Avengers",
+    "movie_genre": "Action",
+    "movie_duration": 120,
+    "hall_name": "Hall A",
+    "cinema_name": "Legend Cineplex"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Show time already exists for this hall, date, and time"
+}
+
+Customer or no token response:
+{
+  "success": false,
+  "message": "You do not have permission"
+}
+
+5. Update ShowTime - Admin Token Required
+PUT http://localhost:3000/api/showtimes/1
+
+Request:
+{
+  "movie_id": 1,
+  "hall_id": 1,
+  "show_date": "2026-05-23",
+  "show_time": "15:15",
+  "status": "active"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "show_time_id": 1,
+    "show_date": "2026-05-23",
+    "show_time": "15:15:00",
+    "status": "active",
+    "movie_title": "Avengers",
+    "movie_genre": "Action",
+    "movie_duration": 120,
+    "hall_name": "Hall A",
+    "cinema_name": "Legend Cineplex"
+  }
+}
+
+6. Delete ShowTime - Admin Token Required
+DELETE http://localhost:3000/api/showtimes/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Show time deleted"
+}
+
+==================================================
+BOOKINGS
+==================================================
+
+1. Get All Bookings - Admin Token Required
+GET http://localhost:3000/api/bookings
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "booking_id": 1,
+      "user_id": 2,
+      "show_time_id": 1,
+      "status": "pending",
+      "total_amount": "20.00",
+      "created_at": "2026-05-24T08:29:40.014Z",
+      "user_name": "Customer Name",
+      "user_email": "customer@example.com",
+      "movie_title": "Avengers",
+      "hall_name": "Hall A",
+      "cinema_name": "Legend Cineplex",
+      "show_date": "2026-05-25",
+      "show_time": "14:00:00"
+    }
+  ]
+}
+
+2. Get Booking By ID - Customer Owner Or Admin Token Required
+GET http://localhost:3000/api/bookings/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "booking_id": 1,
+    "user_id": 2,
+    "show_time_id": 1,
+    "status": "pending",
+    "total_amount": "20.00",
+    "created_at": "2026-05-24T08:29:40.014Z",
+    "user_name": "Customer Name",
+    "user_email": "customer@example.com",
+    "movie_title": "Avengers",
+    "hall_name": "Hall A",
+    "cinema_name": "Legend Cineplex",
+    "show_date": "2026-05-25",
+    "show_time": "14:00:00",
+    "seats": [
+      {
+        "seat_number": "A1",
+        "seat_type": "standard",
+        "price": "10.00"
+      },
+      {
+        "seat_number": "A2",
+        "seat_type": "standard",
+        "price": "10.00"
+      }
+    ]
+  }
+}
+
+3. Get Bookings By User ID - Customer Owner Or Admin Token Required
+GET http://localhost:3000/api/bookings/user/2
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "booking_id": 1,
+      "user_id": 2,
+      "show_time_id": 1,
+      "total_amount": "20.00",
+      "status": "pending",
+      "created_at": "2026-05-24T08:29:40.014Z"
+    }
+  ]
+}
+
+4. Add Booking - Customer Token Required
+POST http://localhost:3000/api/bookings
+
+Request:
+{
+  "show_time_id": 1,
+  "seat_ids": [1, 2]
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "booking_id": 1,
+    "user_id": 2,
+    "show_time_id": 1,
+    "total_amount": "20.00",
+    "status": "pending",
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+Validation responses:
+{
+  "success": false,
+  "message": "Please select at least one seat"
+}
+
+{
+  "success": false,
+  "message": "Duplicate seats are not allowed"
+}
+
+{
+  "success": false,
+  "message": "You can book a maximum of 10 seats at one time"
+}
+
+{
+  "success": false,
+  "message": "Show time not found"
+}
+
+{
+  "success": false,
+  "message": "Cannot book this show time"
+}
+
+{
+  "success": false,
+  "message": "Cannot book a show time in the past"
+}
+
+{
+  "success": false,
+  "message": "One or more seats were not found"
+}
+
+{
+  "success": false,
+  "message": "One or more seats do not belong to this show time hall"
+}
+
+{
+  "success": false,
+  "message": "One or more seats are already booked for this showtime"
+}
+
+{
+  "success": false,
+  "message": "Ticket price is not configured for one or more selected seats"
+}
+
+5. Update Booking Status - Admin Token Required
+PUT http://localhost:3000/api/bookings/1
+
+Request:
+{
+  "status": "confirmed"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "booking_id": 1,
+    "user_id": 2,
+    "show_time_id": 1,
+    "total_amount": "20.00",
+    "status": "confirmed",
+    "created_at": "2026-05-24T08:29:40.014Z"
+  }
+}
+
+Invalid status response:
+{
+  "success": false,
+  "message": "Invalid booking status"
+}
+
+6. Delete Booking - Admin Token Required
+DELETE http://localhost:3000/api/bookings/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Booking deleted"
+}
+
+==================================================
+SEATS
+==================================================
+
+1. Get All Seats
+GET http://localhost:3000/api/seats
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+2. Get Seats By Hall ID
+GET http://localhost:3000/api/seats/hall/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": []
+}
+
+3. Get Seat By ID
+GET http://localhost:3000/api/seats/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "data": {
+    "seat_id": 1,
+    "hall_id": 1,
+    "seat_number": "A1",
+    "seat_type": "standard"
+  }
+}
+
+4. Add One Seat - Admin Token Required
+POST http://localhost:3000/api/seats
+
+Request:
+{
+  "hall_id": 1,
+  "seat_number": "A1",
+  "seat_type": "standard"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "seat_id": 1,
+    "hall_id": 1,
+    "seat_number": "A1",
+    "seat_type": "standard"
+  }
+}
+
+Duplicate response:
+{
+  "success": false,
+  "message": "Seat number already exists in this hall"
+}
+
+5. Add Seats By Capacity - Admin Token Required
+POST http://localhost:3000/api/seats/bulk
+
+Request:
+{
+  "hall_id": 1,
+  "capacity": 100,
+  "seat_type": "standard"
+}
+
+Response:
+{
+  "success": true,
+  "message": "100 seats created successfully",
+  "data": [
+    {
+      "seat_id": 1,
+      "hall_id": 1,
+      "seat_number": "A1",
+      "seat_type": "standard"
+    },
+    {
+      "seat_id": 100,
+      "hall_id": 1,
+      "seat_number": "J10",
+      "seat_type": "standard"
+    }
+  ]
+}
+
+6. Update Seat - Admin Token Required
+PUT http://localhost:3000/api/seats/1
+
+Request:
+{
+  "seat_number": "A2",
+  "seat_type": "vip"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "seat_id": 1,
+    "hall_id": 1,
+    "seat_number": "A2",
+    "seat_type": "vip"
+  }
+}
+
+7. Delete Seat - Admin Token Required
+DELETE http://localhost:3000/api/seats/1
+
+Request:
+No body
+
+Response:
+{
+  "success": true,
+  "message": "Seat deleted"
+}

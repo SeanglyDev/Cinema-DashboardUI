@@ -1,5 +1,5 @@
 import type { CreateMovieInput, UpdateMovieInput, MovieFromDB } from '../@types/movie';
-import { getAllMovies, getMovieById, createMovie, updateMovie, deleteMovie } from '../models/movieModel';
+import { getAllMovies, getMovieById, getMovieByTitle, createMovie, updateMovie, deleteMovie } from '../models/movieModel';
 
 // Get all movies
 export async function fetchAllMovies(): Promise<MovieFromDB[]> {
@@ -16,6 +16,8 @@ export async function fetchMovieById(id: number): Promise<MovieFromDB> {
 // Create movie
 export async function addMovie(data: CreateMovieInput): Promise<MovieFromDB> {
   if (!data.title) throw new Error('Title is required');
+  const existingMovie = await getMovieByTitle(data.title);
+  if (existingMovie) throw new Error('Movie already exists');
   return await createMovie(data);
 }
 

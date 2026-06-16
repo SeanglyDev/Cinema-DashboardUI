@@ -18,6 +18,15 @@ export async function getMovieById(id: number): Promise<MovieFromDB | null> {
   return result.rows[0] || null;
 }
 
+// Get movie by title
+export async function getMovieByTitle(title: string): Promise<MovieFromDB | null> {
+  const result = await pool.query(
+    'SELECT * FROM movies WHERE LOWER(title) = LOWER($1) LIMIT 1',
+    [title.trim()]
+  );
+  return result.rows[0] || null;
+}
+
 // Create movie
 export async function createMovie(data: CreateMovieInput): Promise<MovieFromDB> {
   const result = await pool.query(
